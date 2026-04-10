@@ -1,0 +1,101 @@
+.section {
+  padding: 120px 24px;
+  background: var(--surface);
+  position: relative;
+  overflow: hidden;
+}
+
+.glowRight {
+  position: absolute;
+  top: 30%;
+  right: -200px;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(0, 255, 204, 0.1) 0%, rgba(5, 5, 8, 0) 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.contentWrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 80px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+}
+
+.rowReverse {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+  flex-direction: row-reverse;
+}
+
+.textContent {
+  flex: 1;
+}
+
+.visualContent {
+  flex: 1;
+  position: relative;
+}
+
+.label {
+  color: var(--secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+}
+
+.title {
+  font-size: clamp(2rem, 4vw, 2.5rem);
+  margin-bottom: 24px;
+  line-height: 1.2;
+}
+
+.description {
+  color: var(--text-muted);
+  font-size: 1.125rem;
+  margin-bottom: 32px;
+}
+
+.list {
+  list-style: none;
+}
+
+.listItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.check {
+  color: var(--background);
+  background: var(--primary);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+@media (max-width: 968px) {
+  .row, .rowReverse {
+    flex-direction: column;
+  }
+}

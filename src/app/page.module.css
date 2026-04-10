@@ -1,142 +1,238 @@
-.page {
-  --background: #fafafa;
-  --foreground: #fff;
-
-  --text-primary: #000;
-  --text-secondary: #666;
-
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-  --button-secondary-border: #ebebeb;
-
+.hero {
+  min-height: 100vh;
   display: flex;
-  flex: 1;
   flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-family: var(--font-geist-sans);
-  background-color: var(--background);
+  align-items: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding-top: 80px;
 }
 
-.main {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  max-width: 800px;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: space-between;
-  background-color: var(--foreground);
-  padding: 120px 60px;
+.heroBackground {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: 100vh;
+  background: radial-gradient(circle at center, rgba(0, 255, 136, 0.05) 0%, transparent 60%);
+  z-index: -1;
+  pointer-events: none;
 }
 
-.intro {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  text-align: left;
+.heroTitle {
+  font-size: 4.5rem;
+  max-width: 1000px;
+  line-height: 1.1;
+  margin-bottom: 24px;
+}
+
+.heroSubtitle {
+  font-size: 1.25rem;
+  color: var(--text-muted);
+  max-width: 700px;
+  margin-bottom: 48px;
+}
+
+@media (max-width: 768px) {
+  .heroTitle { font-size: 2.5rem; }
+}
+
+.sectionTitle {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.sectionSubtitle {
+  font-size: 1.125rem;
+  color: var(--text-muted);
+  text-align: center;
+  margin-bottom: 64px;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+/* Problemas */
+.problemGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
 }
 
-.intro h1 {
-  max-width: 320px;
-  font-size: 40px;
-  font-weight: 600;
-  line-height: 48px;
-  letter-spacing: -2.4px;
-  text-wrap: balance;
-  color: var(--text-primary);
-}
-
-.intro p {
-  max-width: 440px;
-  font-size: 18px;
-  line-height: 32px;
-  text-wrap: balance;
-  color: var(--text-secondary);
-}
-
-.intro a {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.ctas {
+.problemCard {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  max-width: 440px;
-  gap: 16px;
-  font-size: 14px;
-}
-
-.ctas a {
-  display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  height: 40px;
-  padding: 0 16px;
-  border-radius: 128px;
-  border: 1px solid transparent;
-  transition: 0.2s;
-  cursor: pointer;
-  width: fit-content;
+  text-align: center;
+  gap: 16px;
+  padding: 40px 24px;
+}
+
+.problemIcon {
+  color: #ff3366;
+  font-size: 2rem;
+  background: rgba(255,51,102,0.1);
+  padding: 16px;
+  border-radius: 50%;
+}
+
+.problemText {
+  font-size: 1.125rem;
+  color: var(--text);
   font-weight: 500;
 }
 
-a.primary {
-  background: var(--text-primary);
-  color: var(--background);
-  gap: 8px;
+.problemClosure {
+  text-align: center;
+  margin-top: 64px;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--text);
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  padding: 40px;
+  border-radius: 16px;
+  background: rgba(0, 255, 136, 0.02);
 }
 
-a.secondary {
-  border-color: var(--button-secondary-border);
+/* Pilares */
+.featuresGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
 }
 
-/* Enable hover only on non-touch devices */
-@media (hover: hover) and (pointer: fine) {
-  a.primary:hover {
-    background: var(--button-primary-hover);
-    border-color: transparent;
-  }
-
-  a.secondary:hover {
-    background: var(--button-secondary-hover);
-    border-color: transparent;
-  }
+@media (max-width: 768px) {
+  .featuresGrid { grid-template-columns: 1fr; }
 }
 
-@media (max-width: 600px) {
-  .main {
-    padding: 48px 24px;
-  }
-
-  .intro {
-    gap: 16px;
-  }
-
-  .intro h1 {
-    font-size: 32px;
-    line-height: 40px;
-    letter-spacing: -1.92px;
-  }
+.featureTitle {
+  font-size: 1.75rem;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
-@media (prefers-color-scheme: dark) {
-  .logo {
-    filter: invert();
-  }
+.badge {
+  background: rgba(0, 255, 136, 0.1);
+  color: var(--primary);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+}
 
-  .page {
-    --background: #000;
-    --foreground: #000;
+.featureList {
+  list-style: none;
+}
 
-    --text-primary: #ededed;
-    --text-secondary: #999;
+.featureList li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
 
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
-    --button-secondary-border: #1a1a1a;
-  }
+.featureList li svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+/* SaaS Diferenciais */
+.saasSection {
+  background: var(--surface);
+  border-radius: 24px;
+  padding: 100px 48px;
+  text-align: center;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.saasTitle {
+  font-size: 3.5rem;
+  margin-bottom: 24px;
+}
+
+.saasGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px;
+  margin-top: 64px;
+  text-align: left;
+}
+
+@media (max-width: 768px) {
+  .saasGrid { grid-template-columns: 1fr; }
+}
+
+.saasCard {
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.saasCard::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 4px;
+  background: var(--primary);
+}
+
+.saasIcon {
+  font-size: 2.5rem;
+  margin-bottom: 24px;
+}
+
+.saasCardTitle {
+  font-size: 1.75rem;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.saasCardDesc {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+  line-height: 1.6;
+}
+
+/* Garantia */
+.garantiaBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 80px 48px;
+  border: 2px solid rgba(0, 255, 136, 0.3);
+  border-radius: 24px;
+  background: linear-gradient(180deg, rgba(0,255,136,0.05) 0%, transparent 100%);
+  box-shadow: 0 10px 40px rgba(0,255,136,0.05);
+}
+
+.garantiaIcon {
+  font-size: 4rem;
+  margin-bottom: 24px;
+}
+
+.garantiaText {
+  font-size: 1.5rem;
+  max-width: 800px;
+  font-weight: 500;
+}
+
+/* CTA Footer */
+.ctaFooter {
+  text-align: center;
+  padding: 100px 0;
+}
+
+.ctaFooterTitle {
+  font-size: 2.5rem;
+  margin-bottom: 40px;
+  max-width: 800px;
+  margin-inline: auto;
 }

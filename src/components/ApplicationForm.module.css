@@ -1,0 +1,46 @@
+.section {
+  padding: 120px 24px;
+  background: var(--surface);
+  position: relative;
+  text-align: center;
+}
+
+.formBox {
+  max-width: 600px;
+  margin: 64px auto 0;
+  text-align: left;
+}
+
+.inputGroup {
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 8px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.2);
+}
+
+.submitBtn {
+  width: 100%;
+  margin-top: 16px;
+}
