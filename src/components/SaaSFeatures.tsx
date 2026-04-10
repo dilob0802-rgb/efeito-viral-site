@@ -1,4 +1,3 @@
-import { Bot, Activity } from 'lucide-react';
 import styles from './Solution.module.css';
 
 export default function SaaSFeatures() {

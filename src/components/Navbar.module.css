@@ -3,12 +3,10 @@
   top: 0;
   left: 0;
   width: 100%;
-  padding: 24px 0;
+  padding: 20px 0;
   z-index: 1000;
-  background: rgba(5, 5, 8, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(157, 78, 221, 0.1);
+  background: #050508;
+  border-bottom: 1px solid var(--border);
 }
 
 .container {
