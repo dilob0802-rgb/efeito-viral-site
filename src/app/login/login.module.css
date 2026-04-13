@@ -87,6 +87,38 @@
   color: #fff;
   font-size: 1rem;
   transition: all 0.2s ease;
+  width: 100%;
+}
+
+.passwordWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordWrapper input {
+  padding-right: 48px;
+}
+
+.toggleButton {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.toggleButton:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .inputGroup input:focus {

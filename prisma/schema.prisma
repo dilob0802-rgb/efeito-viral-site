@@ -16,14 +16,23 @@ model Lead {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String
-  role          Role      @default(USER)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  competitors   Competitor[]
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  password           String
+  role               Role      @default(USER)
+  
+  // Dados do Perfil (Onboarding)
+  niche              String?
+  subscribers        String?
+  mainGoal           String?
+  painPoints         String?   // Salvo como string separada por vírgula ou JSON
+  selectedMentor     String?
+  onboardingComplete Boolean   @default(false)
+
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  competitors        Competitor[]
 }
 
 enum Role {
