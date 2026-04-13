@@ -29,12 +29,15 @@
 }
 
 .title {
-  font-size: clamp(3rem, 8vw, 5rem);
-  line-height: 1.1;
-  margin-bottom: 24px;
-  background: linear-gradient(135deg, #ffffff 30%, #9d4edd 100%);
+  font-size: clamp(3.5rem, 15vw, 10rem);
+  font-weight: 900;
+  line-height: 0.9;
+  margin-bottom: 32px;
+  letter-spacing: -0.05em;
+  background: linear-gradient(to bottom, #ffffff 40%, #9d4edd 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
 }
 
 .subtitle {

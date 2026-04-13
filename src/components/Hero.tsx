@@ -7,7 +7,7 @@ export default function Hero() {
       <div className={styles.content}>
         <div className={styles.badge}>Acesso Restrito</div>
         <h1 className={styles.title}>
-          O Método para Viralizar
+          EFEITO VIRAL
         </h1>
         <p className={styles.subtitle}>
           Pare de depender de &quot;dancinhas&quot; ou sorte. Tenha acesso ao ecossistema fechado que os maiores criadores usam para hackear algoritmos e escalar audiências.

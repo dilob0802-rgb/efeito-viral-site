@@ -1,0 +1,154 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.header {
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff 0%, #9d4edd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1.125rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 32px;
+  margin-bottom: 64px;
+}
+
+.mainCard {
+  padding: 48px !important;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cardIcon {
+  font-size: 3rem;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 0 10px var(--primary));
+}
+
+.cardTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #fff;
+}
+
+.cardText {
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto 32px;
+  line-height: 1.6;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  color: #e0e0e0;
+}
+
+.stepNumber {
+  width: 28px;
+  height: 28px;
+  background: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.875rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.statsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.statCard {
+  padding: 24px !important;
+  text-align: center;
+}
+
+.statValue {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin-top: 8px;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  padding-top: 48px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.featureItem {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.featureIcon {
+  font-size: 2rem;
+}
+
+.featureItem h4 {
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.featureItem p {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .features {
+    grid-template-columns: 1fr;
+  }
+}
