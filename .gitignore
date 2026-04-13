@@ -41,3 +41,17 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# local databases
+*.db
+*.db-journal
+
+# scratch scripts
+test-gemini.js
+scan-models.js
+list-models.js
+force-test.js
+test-connection.js
+*.img
+*.png
+*.webp

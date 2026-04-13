@@ -1,0 +1,218 @@
+.container {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #9d4edd 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1.1rem;
+}
+
+.searchArena {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 20px;
+  align-items: center;
+  margin-bottom: 60px;
+}
+
+.vsCircle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-style: italic;
+  color: #fff;
+  box-shadow: 0 0 20px rgba(157, 78, 221, 0.4);
+}
+
+.duelGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+
+.fighterCard {
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.winnerEffect {
+  box-shadow: 0 0 40px rgba(0, 242, 255, 0.15);
+  border: 1px solid rgba(0, 242, 255, 0.3);
+}
+
+.winnerBadge {
+  position: absolute;
+  top: -12px;
+  right: 20px;
+  background: #00f2ff;
+  color: #000;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.fighterHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
+.fighterName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.metricRow {
+  margin-bottom: 20px;
+}
+
+.metricLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.barBg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.barFill {
+  height: 100%;
+  background: var(--primary);
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.veredictoCard {
+  margin-top: 60px;
+  border: 1px solid rgba(157, 78, 221, 0.2);
+}
+
+.veredictoHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.veredictoIcon {
+  font-size: 1.5rem;
+}
+
+.iaContent {
+  color: var(--text-light);
+  line-height: 1.7;
+}
+
+.analysisHeading {
+  font-weight: 800;
+  color: var(--primary);
+  margin: 24px 0 12px;
+  font-size: 1.1rem;
+}
+
+.analysisLine {
+  margin-bottom: 12px;
+}
+
+.searchBox {
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  background: rgba(157, 78, 221, 0.05);
+}
+
+.duelBtn {
+  margin-top: 32px;
+  width: 100%;
+  padding: 16px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.fightOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.loadingText {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .searchArena {
+    grid-template-columns: 1fr;
+  }
+  .vsCircle {
+    margin: 0 auto;
+  }
+  .duelGrid {
+    grid-template-columns: 1fr;
+  }
+}

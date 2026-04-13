@@ -1,0 +1,161 @@
+.container {
+  padding: 40px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.header {
+  margin-bottom: 40px;
+}
+
+.title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+  color: #fff;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1rem;
+}
+
+.searchSection {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 48px;
+}
+
+.input {
+  flex: 1;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-family: inherit;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+
+.ideaCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ideaCard:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateX(8px);
+  border-color: rgba(157, 78, 221, 0.3);
+}
+
+.ideaMain {
+  flex: 1;
+}
+
+.predictionBadge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+}
+
+.vh { background: linear-gradient(90deg, #ff00ff, #ff9100); color: #fff; }
+.h { background: #00f2ff; color: #000; }
+.m { background: #ffea00; color: #000; }
+
+.ideaTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.why {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-left: 24px;
+}
+
+.copyBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: none;
+  color: var(--text-muted);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.2s;
+}
+
+.copyBtn:hover {
+  background: var(--primary);
+  color: #fff;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 100px 0;
+  opacity: 0.5;
+}
+
+.loadingWrapper {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.loader {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(157, 78, 221, 0.2);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  margin: 0 auto 20px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .ideaCard {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .actions {
+    margin-left: 0;
+    margin-top: 20px;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
