@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import styles from './ApplicationForm.module.css';
 
 export default function ApplicationForm() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     nome: '',
     perfilSocial: '',
@@ -26,6 +28,7 @@ export default function ApplicationForm() {
 
       if (response.ok) {
         setStatus('success');
+        router.push('/sucesso');
       } else {
         setStatus('error');
       }
@@ -34,29 +37,6 @@ export default function ApplicationForm() {
       setStatus('error');
     }
   };
-
-  if (status === 'success') {
-    return (
-      <section id="inscricao" className={styles.section}>
-        <div className="container" style={{ position: 'relative', zIndex: 1 }}>
-          <div className="glass-card" style={{ maxWidth: '600px', margin: '0 auto', textAlign: 'center', padding: '64px 32px' }}>
-            <div style={{ fontSize: '4rem', marginBottom: '24px' }}>✅</div>
-            <h2 style={{ fontSize: '2rem', marginBottom: '16px' }}>Inscrição Recebida!</h2>
-            <p className="text-muted" style={{ fontSize: '1.125rem', marginBottom: '32px' }}>
-              Obrigado por confiar no Efeito Viral. Analisaremos seu perfil e entraremos em contato em breve.
-            </p>
-            <button 
-              onClick={() => setStatus('idle')} 
-              className="btn-primary"
-              style={{ padding: '12px 24px', fontSize: '1rem' }}
-            >
-              Voltar
-            </button>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section id="inscricao" className={styles.section}>
