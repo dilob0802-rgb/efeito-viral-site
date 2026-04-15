@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 import { getMyVideos } from "@/lib/youtube";
+import { refreshAccessToken } from "@/lib/youtubeAnalytics"; // Forçando recompilação
 
 export async function GET(req: Request) {
   try {
@@ -25,29 +26,40 @@ export async function GET(req: Request) {
     }
 
     try {
-      const videos = await getMyVideos(user.googleAccessToken);
+      let accessToken = user.googleAccessToken;
+      let videos = [];
+      
+      try {
+        videos = await getMyVideos(accessToken);
+      } catch (apiError: any) {
+        // Se for erro de autenticação (401), tenta renovar
+        if (apiError.message?.includes("401") || apiError.status === 401) {
+           accessToken = await refreshAccessToken(session.user.email);
+           videos = await getMyVideos(accessToken);
+        } else {
+           throw apiError;
+        }
+      }
       
       if (videos.length === 0) {
-        // Log para debug interno (pode ser visto no terminal do servidor)
-        console.log("YouTube API retornou 0 vídeos para o token fornecido.");
+        // Se ainda for zero, pode ser canal novo ou erro de quota
+        console.log("YouTube API retornou 0 vídeos para o canal.");
       }
 
-      // Formatar a duração e adicionar scores mockados por enquanto
-      const formattedVideos = videos.map(v => {
-        // Converte PT1M30S para segundos para detectar shorts (< 60s)
+      // Formatar a duração
+      const formattedVideos = videos.map((v: any) => {
         const durationStr = v.duration || "";
-        let totalSeconds = 0;
         const hoursMatch = durationStr.match(/(\d+)H/);
         const minutesMatch = durationStr.match(/(\d+)M/);
         const secondsMatch = durationStr.match(/(\d+)S/);
-
+        
+        let totalSeconds = 0;
         if (hoursMatch) totalSeconds += parseInt(hoursMatch[1]) * 3600;
         if (minutesMatch) totalSeconds += parseInt(minutesMatch[1]) * 60;
         if (secondsMatch) totalSeconds += parseInt(secondsMatch[1]);
 
         const isShort = totalSeconds <= 60 && !hoursMatch;
         
-        // Formata para exibição (ex: 1:30)
         let displayDuration = "";
         if (hoursMatch) displayDuration += hoursMatch[1] + ":";
         displayDuration += (minutesMatch ? minutesMatch[1] : "0") + ":";

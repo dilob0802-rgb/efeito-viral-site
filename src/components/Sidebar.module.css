@@ -1,32 +1,35 @@
 .sidebar {
-  width: 260px;
+  width: 240px;
   height: 100vh;
-  background-color: #08080c;
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background-color: #0c0c14; /* Escuro profundo como na imagem */
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
   display: flex;
   flex-direction: column;
   position: fixed;
   left: 0;
   top: 0;
   z-index: 100;
-  padding: 32px 16px;
+  padding: 20px 8px; /* Menos padding lateral para os itens respirarem */
+  color: #fff;
+  transition: all 0.3s ease;
 }
 
 .logoContainer {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 48px;
+  gap: 8px;
+  margin-bottom: 24px;
   padding: 0 12px;
 }
 
 .logo {
-  font-size: 1.125rem;
-  font-weight: 950;
-  letter-spacing: -0.02em;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 800;
   color: #fff;
   text-decoration: none;
-  background: linear-gradient(to bottom, #ffffff, #9d4edd);
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #fff, #9d4edd);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -34,31 +37,67 @@
 .badge {
   background: var(--primary);
   color: #fff;
-  font-size: 0.625rem;
-  font-weight: 800;
-  padding: 2px 6px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 4px;
   border-radius: 4px;
-  letter-spacing: 0.05em;
+  text-transform: uppercase;
 }
 
 .nav {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 2px;
   flex: 1;
+  overflow-y: auto;
+  padding-right: 4px; /* Espaço para scrollbar */
+}
+
+/* Scrollbar fina premium */
+.nav::-webkit-scrollbar {
+  width: 4px;
+}
+.nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+.nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+.nav:hover::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.navGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.groupHeader {
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  color: #64748b;
+  padding: 12px 12px 8px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .navLink {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border-radius: 12px;
-  color: var(--text-muted);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #94a3b8;
   text-decoration: none;
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 400;
   transition: all 0.2s ease;
+  white-space: nowrap;
 }
 
 .navLink:hover {
@@ -67,31 +106,47 @@
 }
 
 .active {
-  background: rgba(157, 78, 221, 0.1);
-  color: var(--primary);
+  background: rgba(255, 255, 255, 0.08); /* Estilo da imagem */
+  color: #fff !important;
+  font-weight: 500;
 }
 
 .icon {
-  font-size: 1.125rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  opacity: 0.8;
+}
+
+.active .icon {
+  opacity: 1;
+}
+
+.name {
+  flex: 1;
 }
 
 .footer {
   margin-top: auto;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
 }
 
 .userCard {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px;
-  margin-bottom: 16px;
+  gap: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 12px;
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, #9d4edd, #5a189a);
   border-radius: 50%;
   display: flex;
@@ -100,11 +155,11 @@
   font-weight: 700;
   color: #fff;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .avatarLetter {
-  font-size: 1rem;
-  letter-spacing: -0.02em;
+  font-size: 0.8rem;
 }
 
 .avatarImage {
@@ -116,34 +171,42 @@
 .userInfo {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .userName {
-  font-size: 0.875rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #fff;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .userRole {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.7rem;
+  color: #64748b;
 }
 
 .logoutBtn {
   width: 100%;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   background: transparent;
-  color: #fff;
-  font-size: 0.875rem;
-  font-weight: 600;
+  color: #94a3b8;
+  font-size: 0.8125rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .logoutBtn:hover {
-  background: rgba(255, 77, 79, 0.1);
-  border-color: rgba(255, 77, 79, 0.2);
-  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.08);
+  border-color: rgba(255, 77, 79, 0.1);
+  color: #f87171;
 }

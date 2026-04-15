@@ -3,7 +3,7 @@ import prisma from "./prisma";
 const YOUTUBE_ANALYTICS_API_URL = "https://youtubeanalytics.googleapis.com/v2/reports";
 const TOKEN_URL = "https://oauth2.googleapis.com/token";
 
-async function refreshAccessToken(email: string): Promise<string> {
+export async function refreshAccessToken(email: string): Promise<string> {
   const user = await prisma.user.findUnique({
     where: { email },
     select: { googleRefreshToken: true }

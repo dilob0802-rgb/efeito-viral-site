@@ -25,6 +25,8 @@ export async function GET(req: Request) {
         youtubeChannelName: true,
         youtubeChannelAvatar: true,
         subscribers: true,
+        viewCount: true,
+        videoCount: true,
       }
     });
 
@@ -41,8 +43,10 @@ export async function GET(req: Request) {
           updatedData = {
             youtubeChannelId: channel.id,
             youtubeChannelName: channel.title,
-            youtubeChannelAvatar: channel.thumbnails,
+            youtubeChannelAvatar: channel.thumbnail,
             subscribers: channel.subscriberCount,
+            viewCount: channel.viewCount,
+            videoCount: channel.videoCount,
           };
 
           // Salva os dados atualizados no banco

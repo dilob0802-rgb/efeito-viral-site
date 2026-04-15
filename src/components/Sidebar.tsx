@@ -4,16 +4,34 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Sidebar.module.css";
 import { useSession, signOut } from "next-auth/react";
+import { 
+  Home, 
+  Settings, 
+  Hash, 
+  User, 
+  Eye, 
+  Lightbulb, 
+  GraduationCap, 
+  Users, 
+  Image, 
+  LogOut,
+  ChevronDown
+} from "lucide-react";
 
 const menuItems = [
-  { name: "Visão Geral", path: "/membros", icon: "📊" },
-  { name: "Busca Viral", path: "/membros/analise", icon: "🔍" },
-  { name: "Raio-X Conteúdo", path: "/membros/raiox", icon: "🎥" },
-  { name: "Comparador", path: "/membros/comparador", icon: "⚔️" },
-  { name: "Ideias Diárias", path: "/membros/ideias", icon: "💡" },
-  { name: "Otimizador Pro", path: "/membros/otimizador", icon: "🛠️" },
-  { name: "Mentor IA", path: "/membros/mentor", icon: "🧠" },
-  { name: "Meu Perfil", path: "/membros/perfil", icon: "👤" },
+  { group: "Principal", items: [
+    { name: "Deskboard", path: "/membros", icon: <Home size={20} /> },
+    { name: "Otimizador Pro", path: "/membros/otimizador", icon: <Settings size={20} /> },
+    { name: "Busca Viral", path: "/membros/analise", icon: <Hash size={20} /> },
+  ]},
+  { group: "Mais ferramentas", items: [
+    { name: "Mentor IA", path: "/membros/coaching", icon: <User size={20} /> },
+    { name: "Comparador", path: "/membros/comparador", icon: <Eye size={20} /> },
+    { name: "Ideias Diárias", path: "/membros/ideias", icon: <Lightbulb size={20} /> },
+    { name: "Aprender", path: "/membros/aprender", icon: <GraduationCap size={20} /> },
+    { name: "Meu Perfil", path: "/membros/perfil", icon: <Users size={20} /> },
+    { name: "Miniaturas", path: "/membros", icon: <Image size={20} /> },
+  ]}
 ];
 
 export default function Sidebar() {
@@ -31,19 +49,28 @@ export default function Sidebar() {
       </div>
 
       <nav className={styles.nav}>
-        {menuItems.map((item) => {
-          const isActive = pathname === item.path;
-          return (
-            <Link
-              key={item.path}
-              href={item.path}
-              className={`${styles.navLink} ${isActive ? styles.active : ""}`}
-            >
-              <span className={styles.icon}>{item.icon}</span>
-              <span className={styles.name}>{item.name}</span>
-            </Link>
-          );
-        })}
+        {menuItems.map((group, gIdx) => (
+          <div key={gIdx} className={styles.navGroup}>
+            {group.group === "Mais ferramentas" && (
+              <div className={styles.groupHeader}>
+                {group.group} <ChevronDown size={14} />
+              </div>
+            )}
+            {group.items.map((item) => {
+              const isActive = pathname === item.path;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.path}
+                  className={`${styles.navLink} ${isActive ? styles.active : ""}`}
+                >
+                  <span className={styles.icon}>{item.icon}</span>
+                  <span className={styles.name}>{item.name}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ))}
       </nav>
 
       <div className={styles.footer}>
@@ -72,7 +99,7 @@ export default function Sidebar() {
           </div>
         </div>
         <button className={styles.logoutBtn} onClick={() => signOut()}>
-          Sair
+          <LogOut size={16} /> Sair
         </button>
       </div>
     </aside>

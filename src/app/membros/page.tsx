@@ -11,46 +11,56 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 // Funções para simular crescimento retroativo baseado no número atual
 const generateMockData = (period: string, currentValue: number) => {
   const data = [];
-  const baseValue = Math.max(10, currentValue * 0.4); // começar de algo menor
-  const volatility = period === 'Diário' || period === 'Tempo Real' ? 0.05 : 0.15;
+  const points = period === 'Tempo Real' ? 12 : period === 'Diário' ? 24 : period === 'Semanal' ? 7 : period === 'Mensal' ? 30 : 12;
   
-  let points = 7;
-  let labels = [];
+  // Gera labels e dados proporcionais
+  const labels = [];
+  const now = new Date();
   
-  if (period === 'Tempo Real') { points = 10; labels = ['-9m', '-8m', '-7m', '-6m', '-5m', '-4m', '-3m', '-2m', '-1m', 'Agora']; }
-  else if (period === 'Diário') { points = 24; labels = Array.from({length: 24}, (_, i) => `${i}h`); }
-  else if (period === 'Semanal') { points = 7; labels = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']; }
-  else if (period === 'Mensal') { points = 4; labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4']; }
-  else if (period === 'Anual') { points = 12; labels = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']; }
-
-  let currentPoint = baseValue;
-  const growthPerStep = (currentValue - baseValue) / points;
-
-  for (let i = 0; i < points; i++) {
-    const isLast = i === points - 1;
-    if (isLast) {
-      currentPoint = currentValue;
-    } else {
-      currentPoint += growthPerStep + (Math.random() * growthPerStep * volatility * (Math.random() > 0.5 ? 1 : -1));
-    }
+  for (let i = points - 1; i >= 0; i--) {
+    let label = '';
+    const date = new Date(now);
     
+    if (period === 'Tempo Real') {
+      label = `${i * 5}m atrás`;
+    } else if (period === 'Diário') {
+      date.setHours(now.getHours() - i);
+      label = `${date.getHours()}h`;
+    } else if (period === 'Semanal') {
+      const dias = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+      date.setDate(now.getDate() - i);
+      label = dias[date.getDay()];
+    } else if (period === 'Mensal') {
+      date.setDate(now.getDate() - i);
+      label = `${date.getDate()}/${date.getMonth() + 1}`;
+    } else {
+      const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      date.setMonth(now.getMonth() - i);
+      label = meses[date.getMonth()];
+    }
+
+    // Calcula um valor que cresce até o valor atual com variabilidade
+    const progress = (points - i) / points;
+    const baseValue = currentValue * 0.7; // Começa em 70% do valor atual
+    const randomFactor = 0.85 + (Math.random() * 0.3); // Variabilidade de +-15%
+    const val = Math.floor((baseValue + (currentValue - baseValue) * progress) * randomFactor);
+
     data.push({
-      name: labels[i],
-      Val: Math.floor(currentPoint)
+      name: label,
+      Val: i === 0 ? currentValue : val // O último ponto é sempre o valor real atual
     });
   }
   return data;
 };
 
 export default function Dashboard() {
-  const { data: session, status, update } = useSession();
+  const { data: session, status } = useSession();
   const [stats, setStats] = useState<any>(null);
   const [loadingStats, setLoadingStats] = useState(false);
   const [chartPeriod, setChartPeriod] = useState("Semanal");
   const [chartData, setChartData] = useState<any[]>([]);
 
-  const [chartMetric, setChartMetric] = useState<"Visualizações" | "Inscritos" | "Vídeos">("Visualizações");
-  const [realAnalytics, setRealAnalytics] = useState<any>(null);
+  const [chartMetric, setChartMetric] = useState<"Visualizações"| "Inscritos" | "Vídeos">("Visualizações");
   const [useMockData, setUseMockData] = useState(false);
   const [projection, setProjection] = useState<any>(null);
   const [myVideos, setMyVideos] = useState<any[]>([]);
@@ -59,70 +69,79 @@ export default function Dashboard() {
 
   useEffect(() => {
     async function fetchStats() {
-      const user = session?.user as any;
-      const channelId = user?.youtubeChannelId;
-      
-      if (channelId) {
-        setLoadingStats(true);
-        try {
-          // Busca dados REAIS (Stats básicas)
-          const res = await fetch(`/api/analise/youtube?id=${channelId}`);
-          const data = await res.json();
-          
-          if (data && data.profile) {
-            setStats(data.profile);
+      setLoadingStats(true);
+      try {
+        const resProf = await fetch('/api/user/profile');
+        if (resProf.ok) {
+          const profData = await resProf.json();
+          if (profData.profile) {
+            setStats(profData.profile);
           }
+        }
 
-          // Busca dados ANALYTICS (Gráfico)
-          try {
-            const resAn = await fetch(`/api/user/analytics`);
-            if (resAn.ok) {
-              const anData = await resAn.json();
-              if (anData.rows && anData.rows.length > 0) {
-                const formatted = anData.rows.map((row: any) => ({
-                  name: row[0].split("-").slice(1).reverse().join("/"),
-                  Val: parseInt(chartMetric === "Visualizações" ? row[1] : row[4])
-                }));
+        const resAn = await fetch(`/api/user/analytics`);
+        if (resAn.ok) {
+          const anData = await resAn.json();
+          if (anData.rows && anData.rows.length > 0 && anData.columnHeaders) {
+            const viewIdx = anData.columnHeaders.findIndex((h: any) => h.name === "views");
+            const subIdx = anData.columnHeaders.findIndex((h: any) => h.name === "subscribersGained");
+            
+            if (viewIdx >= 0 && subIdx >= 0) {
+              const formatted = anData.rows.map((row: any) => ({
+                name: row[0].split("-").slice(1).reverse().join("/"),
+                val: chartMetric === "Visualizações" ? parseInt(row[viewIdx]) : parseInt(row[subIdx])
+              }));
+              
+              const maxVal = Math.max(...formatted.map((d: any) => d.val));
+              const profileTotal = stats?.viewCount ? parseInt(stats.viewCount) : 0;
+              
+              if (maxVal < 10 && profileTotal > 100) {
+                setUseMockData(true);
+              } else {
                 setChartData(formatted);
                 setUseMockData(false);
               }
             } else {
-              const anError = await resAn.json();
-              console.log("Analytics API error:", anError);
+              setUseMockData(true);
             }
-          } catch (e) { console.log("Analytics ainda não disponível"); }
-
-        } catch (err) {
-          console.error("Erro ao buscar stats:", err);
-        } finally {
-          setLoadingStats(false);
+          } else if (anData.error) {
+              console.error("Erro do Analytics:", anData.error);
+              setUseMockData(true);
+            } else {
+              setUseMockData(true);
+            }
+        } else {
+          setUseMockData(true);
         }
+      } catch (e) { 
+        console.error("Erro ao buscar dados:", e);
+        setUseMockData(true);
+      } finally {
+        setLoadingStats(false);
       }
     }
 
     if (status === "authenticated") {
       fetchStats();
     }
-  }, [session, status, chartMetric]);
+  }, [status, chartMetric]);
 
-  // Função para navegar para otimizador com o vídeo
-  const handleVideoClick = (videoId: string) => {
-    router.push(`/membros/otimizador?videoId=${videoId}`);
-  };
-
-  // Buscar vídeos do canal
   useEffect(() => {
     async function fetchMyVideos() {
-      const user = session?.user as any;
-      const channelId = user?.youtubeChannelId;
-      
-      if (channelId) {
+      if (status === "authenticated") {
         setLoadingVideos(true);
         try {
-          const res = await fetch(`/api/analise/youtube?channelId=${channelId}`);
+          const res = await fetch('/api/user/videos');
           const data = await res.json();
-          if (data.videos) {
-            setMyVideos(data.videos.slice(0, 5)); // Pegar os 5 primeiros
+          if (Array.isArray(data) && data.length > 0) {
+            setMyVideos(data.slice(0, 5));
+          } else {
+            const user = session?.user as any;
+            if (user?.youtubeChannelId) {
+               const resPub = await fetch(`/api/analise/youtube?channelId=${user.youtubeChannelId}`);
+               const dataPub = await resPub.json();
+               if (dataPub.videos) setMyVideos(dataPub.videos.slice(0, 5));
+            }
           }
         } catch (err) {
           console.error("Erro ao buscar vídeos:", err);
@@ -131,51 +150,48 @@ export default function Dashboard() {
         }
       }
     }
-
-    if (status === "authenticated") {
-      fetchMyVideos();
-    }
+    fetchMyVideos();
   }, [session, status]);
 
-  // Calcula projeção baseada nos dados reais
   useEffect(() => {
-    if (!stats || loadingStats) return;
+    if (!stats) return;
 
     const totalViews = stats?.viewCount ? parseInt(stats.viewCount) : 0;
-    const totalSubs = stats?.subscriberCount ? parseInt(stats.subscriberCount) : 0;
+    const totalSubs = (stats?.subscriberCount || stats?.subscribers) ? parseInt(stats.subscriberCount || stats.subscribers) : 0;
     const videoCount = stats?.videoCount ? parseInt(stats.videoCount) : 0;
     const avgViewsPerVideo = videoCount > 0 ? Math.round(totalViews / videoCount) : 0;
     
-    // Taxa média de crescimento (estimada baseada em dados típicos)
-    const monthlyGrowthRate = 0.08; // 8% ao mês média
+    const engagementRate = totalSubs > 0 ? (avgViewsPerVideo / totalSubs) : 0;
+    const consistencyScore = videoCount > 10 ? 1.15 : videoCount > 5 ? 1.10 : videoCount > 2 ? 1.05 : 1.02;
+    
+    const baseGrowthRate = engagementRate > 0.3 ? 0.12 : engagementRate > 0.1 ? 0.08 : engagementRate > 0.03 ? 0.05 : 0.02;
+    const adjustedGrowthRate = baseGrowthRate * consistencyScore;
     
     const projections = [
-      { periodo: "1 mês", visualizacoes: Math.round(totalViews * (1 + monthlyGrowthRate)), inscritos: Math.round(totalSubs * (1 + monthlyGrowthRate)) },
-      { periodo: "3 meses", visualizacoes: Math.round(totalViews * Math.pow(1 + monthlyGrowthRate, 3)), inscritos: Math.round(totalSubs * Math.pow(1 + monthlyGrowthRate, 3)) },
-      { periodo: "6 meses", visualizacoes: Math.round(totalViews * Math.pow(1 + monthlyGrowthRate, 6)), inscritos: Math.round(totalSubs * Math.pow(1 + monthlyGrowthRate, 6)) },
-      { periodo: "1 ano", visualizacoes: Math.round(totalViews * Math.pow(1 + monthlyGrowthRate, 12)), inscritos: Math.round(totalSubs * Math.pow(1 + monthlyGrowthRate, 12)) },
+      { periodo: "1 mês", visualizacoes: Math.round(avgViewsPerVideo * videoCount * (1 + adjustedGrowthRate)), inscritos: Math.round(totalSubs * (1 + adjustedGrowthRate)) },
+      { periodo: "3 meses", visualizacoes: Math.round(avgViewsPerVideo * videoCount * Math.pow(1 + adjustedGrowthRate, 3)), inscritos: Math.round(totalSubs * Math.pow(1 + adjustedGrowthRate, 3)) },
+      { periodo: "6 meses", visualizacoes: Math.round(avgViewsPerVideo * videoCount * Math.pow(1 + adjustedGrowthRate, 6)), inscritos: Math.round(totalSubs * Math.pow(1 + adjustedGrowthRate, 6)) },
+      { periodo: "1 ano", visualizacoes: Math.round(avgViewsPerVideo * videoCount * Math.pow(1 + adjustedGrowthRate, 12)), inscritos: Math.round(totalSubs * Math.pow(1 + adjustedGrowthRate, 12)) },
     ];
 
     setProjection({
       atual: { visualizacoes: totalViews, inscrito: totalSubs, videos: videoCount, mediaPorVideo: avgViewsPerVideo },
-      projections
+      projections: projections
     });
-  }, [stats, loadingStats]);
+  }, [stats]);
 
-  // Fallback suave para o gráfico se não houver dados históricos
   useEffect(() => {
-    if (chartData.length > 0 && !loadingStats) return;
+    if (!useMockData && chartData.length > 0) return;
 
     let currentValue = 0;
-    if (chartMetric === "Visualizações") currentValue = stats?.viewCount ? parseInt(stats.viewCount) : 1000;
-    else if (chartMetric === "Inscritos") currentValue = stats?.subscriberCount ? parseInt(stats.subscriberCount) : 100;
-    else currentValue = stats?.videoCount ? parseInt(stats.videoCount) : 10;
+    const s = stats as any;
+    if (chartMetric === "Visualizações") currentValue = s?.viewCount ? parseInt(s.viewCount) : 12500;
+    else if (chartMetric === "Inscritos") currentValue = (s?.subscriberCount || s?.subscribers) ? parseInt(s.subscriberCount || s.subscribers) : 570;
+    else currentValue = s?.videoCount ? parseInt(s.videoCount) : 42;
 
-    if (currentValue > 0) {
-      setChartData(generateMockData(chartPeriod, currentValue));
-      setUseMockData(true);
-    }
-  }, [stats, chartMetric, chartPeriod, loadingStats]);
+    setChartData(generateMockData(chartPeriod, currentValue));
+    setUseMockData(true);
+  }, [stats, chartMetric, chartPeriod, loadingStats, useMockData]);
   
   if (status === "loading") return <div className={styles.loading}>Carregando...</div>;
 
@@ -193,9 +209,9 @@ export default function Dashboard() {
           <p className={styles.subtitle}>Aqui está o desempenho do seu canal hoje.</p>
         </div>
         <div className={styles.channelBadge}>
-          { ((session.user as any)?.youtubeChannelAvatar || stats?.thumbnails) ? (
+          { (stats?.youtubeChannelAvatar || (session.user as any)?.youtubeChannelAvatar || stats?.thumbnails) ? (
             <img 
-              src={(session.user as any).youtubeChannelAvatar || stats?.thumbnails} 
+              src={stats?.youtubeChannelAvatar || (session.user as any).youtubeChannelAvatar || stats?.thumbnails} 
               alt="Canal" 
               className={styles.avatar} 
               referrerPolicy="no-referrer"
@@ -214,92 +230,94 @@ export default function Dashboard() {
       </header>
 
       <div className={styles.statsGrid}>
-        <div 
-          className={styles.statCard} 
-          onClick={() => setChartMetric("Visualizações")}
-          style={{ cursor: 'pointer', border: chartMetric === 'Visualizações' ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)', transition: 'border 0.3s' }}
-        >
+        <div className={styles.statCard}>
           <div className={styles.statHeader}>
             <span className={styles.statTitle}>Visualizações</span>
-            <BarChart3 size={20} color={chartMetric === 'Visualizações' ? '#00ffcc' : '#9d4edd'} />
+            <BarChart3 size={20} color="#9d4edd" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats ? "..." : stats?.viewCount ? Number(stats.viewCount).toLocaleString('pt-BR') : "---"}
+            {loadingStats && !stats ? "..." : stats?.viewCount ? Number(stats.viewCount).toLocaleString('pt-BR') : "0"}
           </p>
-          <span className={styles.statTrend}>Monitorando tempo real</span>
+          <span className={styles.statTrend}>Total acumulado</span>
         </div>
 
-        <div 
-          className={styles.statCard}
-          onClick={() => setChartMetric("Inscritos")}
-          style={{ cursor: 'pointer', border: chartMetric === 'Inscritos' ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)', transition: 'border 0.3s' }}
-        >
+        <div className={styles.statCard}>
           <div className={styles.statHeader}>
             <span className={styles.statTitle}>Inscritos</span>
-            <Users size={20} color={chartMetric === 'Inscritos' ? '#00ffcc' : '#9d4edd'} />
+            <Users size={20} color="#00ffcc" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats ? "..." : stats?.subscriberCount ? Number(stats.subscriberCount).toLocaleString('pt-BR') : (session?.user as any)?.subscribers || "---"}
+            {loadingStats && !stats ? "..." : (stats?.subscriberCount || stats?.subscribers) ? Number(stats.subscriberCount || stats.subscribers).toLocaleString('pt-BR') : "0"}
           </p>
-          <span className={styles.statTrend}>Crescimento Viral</span>
+          <span className={styles.statTrend}>Base de fãs</span>
         </div>
 
-        <div 
-          className={styles.statCard}
-          onClick={() => setChartMetric("Vídeos")}
-          style={{ cursor: 'pointer', border: chartMetric === 'Vídeos' ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.05)', transition: 'border 0.3s' }}
-        >
+        <div className={styles.statCard}>
           <div className={styles.statHeader}>
             <span className={styles.statTitle}>Vídeos Publicados</span>
-            <Video size={20} color={chartMetric === 'Vídeos' ? '#00ffcc' : '#9d4edd'} />
+            <Video size={20} color="#ff007f" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats ? "..." : stats?.videoCount || "---"}
+            {loadingStats && !stats ? "..." : (stats?.videoCount || "0")}
           </p>
-          <span className={styles.statTrend}>Frequência de Postagem</span>
+          <span className={styles.statTrend}>Total postado</span>
         </div>
       </div>
 
       <div className={styles.mainContent}>
-        
-        {/* GRÁFICO DE CRESCIMENTO */}
         <div className="glass-card" style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', marginBottom: '24px', gap: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <TrendingUp size={24} color={useMockData ? "#ff6b6b" : "#00ffcc"} />
-              <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Projeção Estratégica (IA): <span style={{ color: 'var(--primary)' }}>{chartMetric}</span></h2>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Projeção Estratégica (IA)</h2>
             </div>
             {useMockData && (
               <span style={{ fontSize: '0.75rem', color: '#ff6b6b', backgroundColor: 'rgba(255,107,107,0.1)', padding: '4px 10px', borderRadius: '12px', border: '1px solid rgba(255,107,107,0.3)' }}>
-                ⚠️ Dados simulados (habilite YouTube Analytics API)
+                ⚠️ Dados simulados
               </span>
             )}
             
-            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-              {periods.map(p => (
-                <button 
-                  key={p} 
-                  onClick={() => setChartPeriod(p)}
-                  style={{
-                    padding: '6px 16px',
-                    borderRadius: '20px',
-                    backgroundColor: chartPeriod === p ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
-                    color: chartPeriod === p ? '#000' : 'var(--text-muted)',
-                    border: 'none',
-                    fontSize: '0.85rem',
-                    fontWeight: chartPeriod === p ? 'bold' : 'normal',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  {p}
-                </button>
-              ))}
+            <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '4px' }}>
+              <button 
+                onClick={() => { setChartMetric("Visualizações"); setChartPeriod("Semanal"); }}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: chartMetric === 'Visualizações' ? '#9d4edd' : 'rgba(255,255,255,0.05)',
+                  color: chartMetric === 'Visualizações' ? '#fff' : 'var(--text-muted)',
+                  border: 'none',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <BarChart3 size={14} /> Visualizações
+              </button>
+              <button 
+                onClick={() => { setChartMetric("Inscritos"); setChartPeriod("Semanal"); }}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  backgroundColor: chartMetric === 'Inscritos' ? '#00ffcc' : 'rgba(255,255,255,0.05)',
+                  color: chartMetric === 'Inscritos' ? '#000' : 'var(--text-muted)',
+                  border: 'none',
+                  fontSize: '0.8rem',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <Users size={14} /> Inscritos
+              </button>
             </div>
           </div>
 
-          <div style={{ width: '100%', height: 300 }}>
+          <div style={{ width: '100%', height: '280px', minHeight: '280px', position: 'relative' }}>
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
@@ -322,13 +340,12 @@ export default function Dashboard() {
               </ResponsiveContainer>
             ) : (
               <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                {loadingStats ? "Carregando dados..." : "Nenhum canal conectado ainda."}
+                {loadingStats ? "Processando projeção..." : "Nenhum canal conectado ainda."}
               </div>
             )}
           </div>
         </div>
 
-        {/* TABELA DE PROJEÇÃO */}
         {projection && (
           <div className="glass-card" style={{ marginBottom: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -338,11 +355,11 @@ export default function Dashboard() {
             
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Visualizações.atual</p>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Visualizações atuais</p>
                 <p style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{projection.atual.visualizacoes.toLocaleString()}</p>
               </div>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Inscritos.atual</p>
+                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Inscritos atuais</p>
                 <p style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{projection.atual.inscrito.toLocaleString()}</p>
               </div>
               <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
@@ -357,7 +374,7 @@ export default function Dashboard() {
                   <th style={{ textAlign: 'left', padding: '12px', color: '#94a3b8', fontWeight: '500' }}>Período</th>
                   <th style={{ textAlign: 'right', padding: '12px', color: '#9d4edd', fontWeight: '500' }}>Visualizações</th>
                   <th style={{ textAlign: 'right', padding: '12px', color: '#00ffcc', fontWeight: '500' }}>Inscritos</th>
-                  <th style={{ textAlign: 'right', padding: '12px', color: '#94a3b8', fontWeight: '500' }}>Crescimento</th>
+                  <th style={{ textAlign: 'right', padding: '12px', color: '#94a3b8', fontWeight: '500' }}>Cronograma</th>
                 </tr>
               </thead>
               <tbody>
@@ -367,7 +384,7 @@ export default function Dashboard() {
                     <td style={{ textAlign: 'right', padding: '14px', color: '#fff' }}>{proj.visualizacoes.toLocaleString()}</td>
                     <td style={{ textAlign: 'right', padding: '14px', color: '#fff' }}>{proj.inscritos.toLocaleString()}</td>
                     <td style={{ textAlign: 'right', padding: '14px', color: idx === 0 ? '#4ade80' : idx === 1 ? '#facc15' : idx === 2 ? '#f97316' : '#ef4444' }}>
-                      +{((idx + 1) * 8)}% ao mês
+                       Próximos {proj.periodo}
                     </td>
                   </tr>
                 ))}
@@ -376,8 +393,7 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* MEUS VÍDEOS E ANÁLISE DE SCORES */}
-        {myVideos.length > 0 && stats && (
+        {myVideos.length > 0 && (
           <div className="glass-card" style={{ marginBottom: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
               <Video size={24} color="#9d4edd" />
@@ -413,14 +429,13 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Análise de Scores */}
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px' }}>
               <h3 style={{ color: '#00ffcc', fontSize: '1rem', marginBottom: '16px' }}>Análise Rápida do Canal</h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '16px' }}>
                 {(() => {
-                  const subs = parseInt(stats.subscriberCount || 0);
-                  const views = parseInt(stats.viewCount || 0);
-                  const videos = parseInt(stats.videoCount || 0);
+                  const subs = parseInt(stats?.subscriberCount || stats?.subscribers || 0);
+                  const views = parseInt(stats?.viewCount || 0);
+                  const videos = parseInt(stats?.videoCount || 0);
                   const avgViews = videos > 0 ? Math.round(views / videos) : 0;
                   const viewToSubRatio = subs > 0 ? (avgViews / subs) * 100 : 0;
                   
@@ -438,16 +453,16 @@ export default function Dashboard() {
                   
                   const getColor = (score: number) => score >= 7 ? '#4ade80' : score >= 4 ? '#fbbf24' : '#f87171';
                   
-                  const getExplanation = (metric: string, score: number, value: number, unit: string) => {
+                  const getExplanation = (metric: string, score: number, value: number) => {
                     if (metric === 'engajamento') {
-                      if (score >= 7) return `Excelente! ${value.toFixed(1)}% dos inscritos assistem em média. Isso indica que seu conteúdo ressoa bem com sua audiência.`;
-                      if (score >= 4) return `Bom. ${value.toFixed(1)}% dos inscritos assistem. Há espaço para melhorar o engajamento.`;
-                      return `Baixo. Apenas ${value.toFixed(1)}% dos inscritos assistem. Considere trabalhar mais o gancho e Calls-to-Action.`;
+                      if (score >= 7) return `Excelente! ${value.toFixed(1)}% dos inscritos assistem em média.`;
+                      if (score >= 4) return `Bom. ${value.toFixed(1)}% dos inscritos assistem.`;
+                      return `Baixo. Apenas ${value.toFixed(1)}% dos inscritos assistem.`;
                     }
                     if (metric === 'autoridade') {
-                      if (score >= 7) return `Muito forte! Cada vídeo atinge ${value.toFixed(0)}% da sua base. Seu canal tem alto impacto.`;
-                      if (score >= 4) return `Sólido. ${value.toFixed(0)}% da base alcançada por vídeo. Continue consistentemente.`;
-                      return `Necesário grows. Apenas ${value.toFixed(0)}% alcançado. Foque em estratégias deDiscovery e retenção.`;
+                      if (score >= 7) return "Muito forte! Alto impacto.";
+                      if (score >= 4) return "Sólido. Continue consistentemente.";
+                      return "Necesário crescer estratégias.";
                     }
                     return '';
                   };
@@ -456,28 +471,20 @@ export default function Dashboard() {
                     <>
                       <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Taxa de Engajamento</p>
+                          <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Efeito de Engajamento</p>
                           <p style={{ color: getColor(scores.engajamento), fontSize: '1.2rem', fontWeight: 'bold' }}>{scores.engajamento}/10</p>
                         </div>
-                        <p style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '8px' }}>Média de visualizações por inscrito</p>
                         <p style={{ color: '#94a3b8', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                          {getExplanation('engajamento', scores.engajamento, viewToSubRatio, '%')}
-                        </p>
-                        <p style={{ color: '#64748b', fontSize: '0.65rem', marginTop: '8px', fontStyle: 'italic' }}>
-                          {">10%"}excelente | 3-10%bom | {"<3%"}baixo
+                          {getExplanation('engajamento', scores.engajamento, viewToSubRatio)}
                         </p>
                       </div>
                       <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                          <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Poder de Alcance</p>
+                          <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Autoridade do Canal</p>
                           <p style={{ color: getColor(scores.autoridade), fontSize: '1.2rem', fontWeight: 'bold' }}>{scores.autoridade}/10</p>
                         </div>
-                        <p style={{ color: '#64748b', fontSize: '0.7rem', marginBottom: '8px' }}>Média por vídeo vsbase total</p>
                         <p style={{ color: '#94a3b8', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                          {getExplanation('autoridade', scores.autoridade, viewToSubRatio, '%')}
-                        </p>
-                        <p style={{ color: '#64748b', fontSize: '0.65rem', marginTop: '8px', fontStyle: 'italic' }}>
-                          {">20%"}viral | 10-20%forte | {"<10%"}desenvolver
+                          {getExplanation('autoridade', scores.autoridade, viewToSubRatio)}
                         </p>
                       </div>
                     </>

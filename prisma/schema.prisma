@@ -25,6 +25,8 @@ model User {
   // Dados do Perfil (Onboarding)
   niche              String?
   subscribers        String?
+  viewCount          String?
+  videoCount         String?
   mainGoal           String?
   painPoints         String?   // Salvo como string separada por vírgula ou JSON
   selectedMentor     String?

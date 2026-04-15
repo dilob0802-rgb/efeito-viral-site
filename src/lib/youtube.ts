@@ -264,7 +264,6 @@ export async function getMyChannel(accessToken: string): Promise<YoutubeChannelI
 }
 
 export async function getMyVideos(accessToken: string): Promise<YoutubeVideoInfo[]> {
-  try {
     // 1. Pegar o ID da playlist de 'uploads' do canal autenticado
     const channelResponse = await fetch(
       `${YOUTUBE_API_BASE_URL}/channels?part=contentDetails&mine=true`,
@@ -274,6 +273,13 @@ export async function getMyVideos(accessToken: string): Promise<YoutubeVideoInfo
     );
 
     const channelData = await channelResponse.json();
+    
+    if (channelData.error) {
+       const error = new Error(channelData.error.message || "Erro na API do YouTube");
+       (error as any).status = channelData.error.code;
+       throw error;
+    }
+
     if (!channelData.items || channelData.items.length === 0) return [];
 
     const uploadsPlaylistId = channelData.items[0].contentDetails.relatedPlaylists.uploads;
@@ -312,11 +318,6 @@ export async function getMyVideos(accessToken: string): Promise<YoutubeVideoInfo
       commentCount: item.statistics.commentCount,
       duration: item.contentDetails.duration,
     }));
-
-  } catch (error) {
-    console.error("Erro em getMyVideos:", error);
-    return [];
-  }
 }
 
 

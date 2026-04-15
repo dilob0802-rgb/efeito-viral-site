@@ -1,15 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap');
 
 :root {
-  --background: #050508;
-  --surface: #0a0a0f;
-  --surface-hover: #13131c;
+  --background: #0c0c14; /* Cor idêntica à Sidebar para harmonia total */
+  --surface: #14141f;
+  --surface-hover: #1c1c2b;
   --primary: #9d4edd;
   --primary-glow: rgba(157, 78, 221, 0.4);
   --secondary: #00ffcc; /* neon accent */
   --text: #ffffff;
-  --text-muted: #8a8a98;
-  --border: #1a1a24;
+  --text-muted: #94a3b8;
+  --border: rgba(255, 255, 255, 0.05);
 }
 
 * {
