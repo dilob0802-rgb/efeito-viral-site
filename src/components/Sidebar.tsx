@@ -13,7 +13,6 @@ import {
   Lightbulb, 
   GraduationCap, 
   Users, 
-  Image, 
   LogOut,
   ChevronDown
 } from "lucide-react";
@@ -30,7 +29,6 @@ const menuItems = [
     { name: "Ideias Diárias", path: "/membros/ideias", icon: <Lightbulb size={20} /> },
     { name: "Aprender", path: "/membros/aprender", icon: <GraduationCap size={20} /> },
     { name: "Meu Perfil", path: "/membros/perfil", icon: <Users size={20} /> },
-    { name: "Miniaturas", path: "/membros", icon: <Image size={20} /> },
   ]}
 ];
 

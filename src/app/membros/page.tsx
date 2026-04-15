@@ -94,7 +94,28 @@ export default function Dashboard() {
         if (resProf.ok) {
           const profData = await resProf.json();
           if (profData.profile) {
-            setStats(profData.profile);
+            const profile = profData.profile;
+            setStats({
+              ...profile,
+              viewCount: profile.viewCount || profile.viewCount,
+              subscriberCount: profile.subscribers || profile.subscriberCount,
+              videoCount: profile.videoCount
+            });
+          }
+        } else {
+          // Fallback: tenta buscar do YouTube diretamente se a API falhar
+          try {
+            const ytRes = await fetch('/api/analise/youtube?channelId=mine');
+            const ytData = await ytRes.json();
+            if (ytData.statistics) {
+              setStats({
+                viewCount: ytData.statistics.viewCount,
+                subscriberCount: ytData.statistics.subscriberCount,
+                videoCount: ytData.statistics.videoCount
+              });
+            }
+          } catch (e) {
+            console.error("Erro ao buscar dados do YouTube:", e);
           }
         }
 
@@ -268,7 +289,7 @@ export default function Dashboard() {
             <Users size={20} color="#00ffcc" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.subscriberCount || stats?.subscribers)}
+            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.subscribers || stats?.subscriberCount)}
           </p>
           <span className={styles.statTrend}>Inscritos atuais</span>
         </div>
