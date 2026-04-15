@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import OnboardingPage from "./onboarding/page";
 import styles from "./dashboard.module.css";
-import { BarChart3, TrendingUp, Users, Video, Clock, Zap, Play } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Video, Clock, Zap, Play, Rocket, Calendar } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 // Função para formatar números com segurança (lida com ranges como "0 - 100")
@@ -284,6 +284,75 @@ export default function Dashboard() {
           <span className={styles.statTrend}>Conteúdo no ar</span>
         </div>
       </div>
+
+
+      {projection && (
+        <div className="glass-card" style={{ marginBottom: '32px', background: 'linear-gradient(135deg, rgba(157, 78, 221, 0.05) 0%, rgba(0, 255, 204, 0.05) 100%)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <Rocket size={24} color="#00ffcc" />
+              <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Previsão de Crescimento Inteligente (IA)</h2>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: '#9d4edd', backgroundColor: 'rgba(157,78,221,0.1)', padding: '4px 10px', borderRadius: '12px', border: '1px solid rgba(157,78,221,0.2)' }}>
+              🎯 Meta: Escalar Viralização
+            </span>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+            <div style={{ padding: '20px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Score de Engajamento</p>
+              <p style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 'bold' }}>{((projection.atual.mediaPorVideo / (projection.atual.inscrito || 1)) * 100).toFixed(1)}%</p>
+              <div style={{ width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px', marginTop: '10px' }}>
+                 <div style={{ width: `${Math.min(((projection.atual.mediaPorVideo / (projection.atual.inscrito || 1)) * 100) * 5, 100)}%`, height: '100%', background: '#00ffcc', borderRadius: '2px' }}></div>
+              </div>
+            </div>
+            <div style={{ padding: '20px', backgroundColor: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
+              <p style={{ color: '#94a3b8', fontSize: '0.8rem', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '1px' }}>Potencial de Escala</p>
+              <p style={{ color: '#fff', fontSize: '1.8rem', fontWeight: 'bold' }}>{projection.atual.mediaPorVideo > 500 ? "ALTO" : "MÉDIO"}</p>
+              <p style={{ color: '#00ffcc', fontSize: '0.75rem', marginTop: '6px' }}>↑ Crescendo consistentemente</p>
+            </div>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                  <th style={{ textAlign: 'left', padding: '16px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem' }}>CRONOGRAMA</th>
+                  <th style={{ textAlign: 'right', padding: '16px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem' }}>ESTIMATIVA VISUALIZAÇÕES</th>
+                  <th style={{ textAlign: 'right', padding: '16px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem' }}>ESTIMATIVA INSCRITOS</th>
+                  <th style={{ textAlign: 'right', padding: '16px', color: '#94a3b8', fontWeight: '600', fontSize: '0.85rem' }}>STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                {projection.projections.map((proj: any, idx: number) => (
+                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)', transition: 'background 0.2s' }}>
+                    <td style={{ padding: '18px 16px', color: '#fff', fontWeight: '600' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Calendar size={16} color="#9d4edd" /> Próximos {proj.periodo}
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'right', padding: '16px', color: '#fff', fontSize: '1.1rem', fontWeight: 'bold' }}>{proj.visualizacoes.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '16px', color: '#00ffcc', fontSize: '1.1rem', fontWeight: 'bold' }}>{proj.inscritos.toLocaleString()}</td>
+                    <td style={{ textAlign: 'right', padding: '16px' }}>
+                      <span style={{ 
+                        padding: '4px 12px', 
+                        borderRadius: '20px', 
+                        fontSize: '0.7rem', 
+                        fontWeight: '700',
+                        backgroundColor: idx === 0 ? 'rgba(74, 222, 128, 0.1)' : idx === 1 ? 'rgba(250, 204, 21, 0.1)' : 'rgba(157, 78, 221, 0.1)',
+                        color: idx === 0 ? '#4ade80' : idx === 1 ? '#facc15' : '#9d4edd',
+                        border: `1px solid ${idx === 0 ? 'rgba(74, 222, 128, 0.2)' : idx === 1 ? 'rgba(250, 204, 21, 0.2)' : 'rgba(157, 78, 221, 0.2)'}`
+                      }}>
+                        {idx === 0 ? "ACELERANDO" : idx === 1 ? "ESTABILIZANDO" : "DOMINANDO"}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       <div className={styles.mainContent}>
         {myVideos.length > 0 && (
