@@ -90,7 +90,7 @@ export const authOptions: NextAuthOptions = {
               role: "USER",
               youtubeChannelId: channelData?.id,
               youtubeChannelName: channelData?.title,
-              youtubeChannelAvatar: channelData?.thumbnails,
+              youtubeChannelAvatar: channelData?.thumbnail,
               subscribers: channelData?.subscriberCount
             }
           });
@@ -101,7 +101,7 @@ export const authOptions: NextAuthOptions = {
                 data: {
                     youtubeChannelId: channelData?.id || existingUser.youtubeChannelId,
                     youtubeChannelName: channelData?.title || existingUser.youtubeChannelName,
-                    youtubeChannelAvatar: channelData?.thumbnails || existingUser.youtubeChannelAvatar,
+                    youtubeChannelAvatar: channelData?.thumbnail || existingUser.youtubeChannelAvatar,
                     subscribers: channelData?.subscriberCount || existingUser.subscribers
                 }
             });
