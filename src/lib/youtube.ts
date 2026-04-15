@@ -353,41 +353,75 @@ export async function getChannelVideosRSS(channelId: string): Promise<YoutubeVid
 export async function getChannelDetailsScraping(input: string): Promise<YoutubeChannelInfo | null> {
   try {
     let url = "";
-    if (input.startsWith("@")) url = `https://www.youtube.com/${input}/about`;
-    else if (input.startsWith("UC")) url = `https://www.youtube.com/channel/${input}/about`;
-    else url = `https://www.youtube.com/results?search_query=${encodeURIComponent(input)}`;
+    const cleanInput = input.trim().replace("@", "");
+    if (input.startsWith("@") || !input.startsWith("UC")) {
+       url = `https://www.youtube.com/@${cleanInput}/about`;
+    } else {
+       url = `https://www.youtube.com/channel/${input}/about`;
+    }
 
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7'
       }
     });
     
     const html = await response.text();
     
-    // Extração básica via Regex dos metadados injetados pelo YouTube (ytInitialData)
-    const subMatch = html.match(/"subscriberCountText":\{"accessibility":\{"accessibilityData":\{"label":"(.*?)"\}\}/);
+    // Extração do JSON ytInitialData
+    const jsonMatch = html.match(/var ytInitialData = (\{.*?\});<\/script>/);
+    if (!jsonMatch) {
+       // Fallback simples se o JSON falhar
+       const titleMatch = html.match(/<meta name="title" content="(.*?)">/);
+       if (!titleMatch) return null;
+       return {
+         id: input,
+         title: titleMatch[1].replace(" - YouTube", ""),
+         description: "",
+         customUrl: input,
+         thumbnail: "",
+         subscriberCount: "0",
+         videoCount: "0",
+         viewCount: "0"
+       };
+    }
+
+    const data = JSON.parse(jsonMatch[1]);
+    const header = data.header?.c4TabbedHeaderRenderer;
+    const metadata = data.metadata?.channelMetadataRenderer;
+    
+    // Função para limpar e converter números (ex: "19,2 M" -> "19200000")
+    const parseYtNumber = (str: string) => {
+      if (!str) return "0";
+      let num = str.toLowerCase().replace(/[^0-9,.]/g, '').replace(',', '.');
+      let multiplier = 1;
+      if (str.includes('M')) multiplier = 1000000;
+      else if (str.includes('K') || str.includes('mil')) multiplier = 1000;
+      return Math.round(parseFloat(num) * multiplier).toString();
+    };
+
+    const title = header?.title || metadata?.title || input;
+    const subsText = header?.subscriberCountText?.simpleText || "";
+    const viewsText = data.body?.browseRequests?.about?.viewCountText?.simpleText || ""; // Localização varia
+    
+    // Tenta encontrar visualizações no JSON de forma recursiva ou via regex no HTML se falhar
+    let totalViews = "0";
     const viewMatch = html.match(/"viewCountText":\{"simpleText":"(.*?)"\}/);
-    const titleMatch = html.match(/"title":\{"simpleText":"(.*?)"\}/);
-    const avatarMatch = html.match(/"avatar":\{"thumbnails":\[\{"url":"(.*?)",/);
-
-    const cleanSubs = subMatch ? subMatch[1].replace(/[^0-9KMB,.]/g, '') : "0";
-    const cleanViews = viewMatch ? viewMatch[1].replace(/[^0-9]/g, '') : "0";
-
-    if (!titleMatch && !subMatch) return null;
+    if (viewMatch) totalViews = viewMatch[1].replace(/[^0-9]/g, '');
 
     return {
       id: input,
-      title: titleMatch ? titleMatch[1] : input,
-      description: "",
+      title: title,
+      description: metadata?.description || "",
       customUrl: input,
-      thumbnail: avatarMatch ? avatarMatch[1] : "",
-      subscriberCount: cleanSubs,
+      thumbnail: header?.avatar?.thumbnails?.[0]?.url || metadata?.avatar?.thumbnails?.[0]?.url || "",
+      subscriberCount: parseYtNumber(subsText),
       videoCount: "0",
-      viewCount: cleanViews
+      viewCount: totalViews
     };
   } catch (error) {
-    console.error("Erro no scraping de detalhes:", error);
+    console.error("Erro no scraping avançado:", error);
     return null;
   }
 }

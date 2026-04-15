@@ -19,34 +19,49 @@ const analyzeChannel = (details: any, videos: any[]) => {
   const videoCount = videos.length;
   const totalViews = videos.reduce((sum, v) => sum + parseInt(v.viewCount || 0), 0);
   const avgViews = videoCount > 0 ? totalViews / videoCount : 0;
-  const engagement = subs > 0 ? (avgViews / subs) * 100 : 0;
   
-  const dailyEstimate = Math.round(subs * 0.001) || 1;
+  // Cálculo de engajamento melhorado
+  const engagement = subs > 0 ? (avgViews / subs) * 100 : 0;
   
   const positives: string[] = [];
   const negatives: string[] = [];
   const scores: any = { engagement: 5, consistency: 5, growth: 5, authority: 5 };
 
-  if (engagement > 10) { positives.push("Excelente taxa de engajamento"); scores.engagement = 10; }
-  else if (engagement > 5) { positives.push("Bom engajamento"); scores.engagement = 7; }
-  else { negatives.push("Engajamento abaixo da média"); scores.engagement = 4; }
+  // 1. Engajamento (Qualidade do conteúdo)
+  if (engagement > 12) { positives.push("Altíssimo engajamento direto"); scores.engagement = 10; }
+  else if (engagement > 6) { positives.push("Engajamento acima da média"); scores.engagement = 8; }
+  else if (engagement > 2) { scores.engagement = 6; }
+  else { negatives.push("Engajamento frio (poucas views p/ inscrito)"); scores.engagement = 3; }
 
-  if (videoCount > 5) { positives.push("Alta frequência recente"); scores.consistency = 10; }
-  else { negatives.push("Frequência moderada"); scores.consistency = 6; }
+  // 2. Consistência (Frequência)
+  if (videoCount >= 10) { positives.push("Postagens frequentes detectadas"); scores.consistency = 10; }
+  else if (videoCount >= 5) { positives.push("Consistência regular"); scores.consistency = 7; }
+  else if (videoCount > 0) { negatives.push("Postagens esporádicas"); scores.consistency = 4; }
+  else { negatives.push("Canal inativo ou sem conteúdo recente"); scores.consistency = 1; }
 
-  if (subs > 100000) { positives.push("Grande base de inscritos"); scores.growth = 10; }
-  else { scores.growth = 7; }
+  // 3. Base Total (Tamanho)
+  if (subs > 1000000) { positives.push("Canal com escala de milhões"); scores.growth = 10; }
+  else if (subs > 100000) { positives.push("Autoridade consolidada (+100k)"); scores.growth = 8; }
+  else if (subs > 10000) { scores.growth = 6; }
+  else { scores.growth = 4; }
+
+  // 4. Autoridade (Visualizações acumuladas)
+  if (viewCount > 10000000) { positives.push("Autoridade histórica massiva"); scores.authority = 10; }
+  else if (viewCount > 1000000) { positives.push("Boa base de visualizações"); scores.authority = 8; }
+  else { scores.authority = 5; }
+
+  const finalScore = Math.round((scores.engagement * 0.4 + scores.consistency * 0.2 + scores.growth * 0.2 + scores.authority * 0.2) * 10);
 
   return {
     positives,
     negatives,
     scores,
-    totalScore: Math.round((scores.engagement + scores.consistency + scores.growth + scores.authority) / 4 * 10),
+    totalScore: finalScore,
     growthEstimate: {
-      daily: dailyEstimate,
-      weekly: dailyEstimate * 7,
-      monthly: dailyEstimate * 30,
-      yearly: dailyEstimate * 365
+      daily: Math.round(subs * 0.0005) || 1,
+      weekly: Math.round(subs * 0.0035) || 7,
+      monthly: Math.round(subs * 0.015) || 30,
+      yearly: Math.round(subs * 0.18) || 365
     }
   };
 };
