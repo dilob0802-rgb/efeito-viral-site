@@ -126,7 +126,7 @@ export default function PlanosPage() {
                        <div className={styles.skeletonLine} />
                        <div className={styles.skeletonLineShort} />
                     </div>
-                    <PayPalScriptProvider options={{ "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "BRL" }}>
+                    <PayPalScriptProvider options={{ clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "BRL" }}>
                       <PayPalButtons 
                         style={{ layout: "vertical", shape: "pill", height: 44, color: plan.highlight ? "blue" : "gold" }}
                         createOrder={(data, actions) => actions.order.create({
