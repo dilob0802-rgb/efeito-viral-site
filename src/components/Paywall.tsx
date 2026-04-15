@@ -110,7 +110,7 @@ export default function Paywall({ children, featureName = "esta ferramenta" }: P
 
         <div style={{ background: '#fff', borderRadius: '12px', padding: '10px' }}>
           <PayPalScriptProvider options={{ 
-            "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
+            clientId: process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "",
             currency: "BRL" 
           }}>
             <PayPalButtons 
