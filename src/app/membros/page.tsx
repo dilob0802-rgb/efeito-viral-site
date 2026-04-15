@@ -286,134 +286,6 @@ export default function Dashboard() {
       </div>
 
       <div className={styles.mainContent}>
-        <div className="glass-card" style={{ marginBottom: '32px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', marginBottom: '24px', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <TrendingUp size={24} color={useMockData ? "#ff6b6b" : "#00ffcc"} />
-              <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Projeção Estratégica (IA)</h2>
-            </div>
-            {useMockData && (
-              <span style={{ fontSize: '0.75rem', color: '#ff6b6b', backgroundColor: 'rgba(255,107,107,0.1)', padding: '4px 10px', borderRadius: '12px', border: '1px solid rgba(255,107,107,0.3)' }}>
-                ⚠️ Dados simulados
-              </span>
-            )}
-            
-            <div style={{ display: 'flex', gap: '4px', overflowX: 'auto', paddingBottom: '4px' }}>
-              <button 
-                onClick={() => { setChartMetric("Visualizações"); setChartPeriod("Semanal"); }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  backgroundColor: chartMetric === 'Visualizações' ? '#9d4edd' : 'rgba(255,255,255,0.05)',
-                  color: chartMetric === 'Visualizações' ? '#fff' : 'var(--text-muted)',
-                  border: 'none',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <BarChart3 size={14} /> Visualizações
-              </button>
-              <button 
-                onClick={() => { setChartMetric("Inscritos"); setChartPeriod("Semanal"); }}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  backgroundColor: chartMetric === 'Inscritos' ? '#00ffcc' : 'rgba(255,255,255,0.05)',
-                  color: chartMetric === 'Inscritos' ? '#000' : 'var(--text-muted)',
-                  border: 'none',
-                  fontSize: '0.8rem',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <Users size={14} /> Inscritos
-              </button>
-            </div>
-          </div>
-
-          <div style={{ width: '100%', height: '280px', minHeight: '280px', position: 'relative' }}>
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
-                  <defs>
-                    <linearGradient id="colorMetric" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor={chartMetric === 'Visualizações' ? '#9d4edd' : chartMetric === 'Inscritos' ? '#00ffcc' : '#ff007f'} stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#9d4edd" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                  <XAxis dataKey="name" stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="rgba(255,255,255,0.3)" fontSize={12} tickLine={false} axisLine={false} 
-                         tickFormatter={(value) => value >= 1000 ? `${(value/1000).toFixed(1)}k` : value} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#13131c', border: `1px solid ${chartMetric === 'Inscritos' ? '#00ffcc' : '#9d4edd'}`, borderRadius: '8px' }}
-                    itemStyle={{ color: '#fff' }}
-                  />
-                  <Area type="monotone" dataKey="Val" stroke={chartMetric === 'Visualizações' ? '#9d4edd' : chartMetric === 'Inscritos' ? '#00ffcc' : '#ff007f'} strokeWidth={3} fillOpacity={1} fill="url(#colorMetric)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : (
-              <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
-                {loadingStats ? "Processando projeção..." : "Nenhum canal conectado ainda."}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {projection && (
-          <div className="glass-card" style={{ marginBottom: '32px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
-              <TrendingUp size={24} color="#00ffcc" />
-              <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Projeção de Crescimento</h2>
-            </div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '16px', marginBottom: '24px' }}>
-              <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Visualizações atuais</p>
-                <p style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{projection.atual.visualizacoes.toLocaleString()}</p>
-              </div>
-              <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Inscritos atuais</p>
-                <p style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{projection.atual.inscrito.toLocaleString()}</p>
-              </div>
-              <div style={{ textAlign: 'center', padding: '16px', backgroundColor: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '8px' }}>Média/Vídeo</p>
-                <p style={{ color: '#fff', fontSize: '1.5rem', fontWeight: 'bold' }}>{projection.atual.mediaPorVideo.toLocaleString()}</p>
-              </div>
-            </div>
-
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                  <th style={{ textAlign: 'left', padding: '12px', color: '#94a3b8', fontWeight: '500' }}>Período</th>
-                  <th style={{ textAlign: 'right', padding: '12px', color: '#9d4edd', fontWeight: '500' }}>Visualizações</th>
-                  <th style={{ textAlign: 'right', padding: '12px', color: '#00ffcc', fontWeight: '500' }}>Inscritos</th>
-                  <th style={{ textAlign: 'right', padding: '12px', color: '#94a3b8', fontWeight: '500' }}>Cronograma</th>
-                </tr>
-              </thead>
-              <tbody>
-                {projection.projections.map((proj: any, idx: number) => (
-                  <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <td style={{ padding: '14px', color: '#fff' }}>{proj.periodo}</td>
-                    <td style={{ textAlign: 'right', padding: '14px', color: '#fff' }}>{proj.visualizacoes.toLocaleString()}</td>
-                    <td style={{ textAlign: 'right', padding: '14px', color: '#fff' }}>{proj.inscritos.toLocaleString()}</td>
-                    <td style={{ textAlign: 'right', padding: '14px', color: idx === 0 ? '#4ade80' : idx === 1 ? '#facc15' : idx === 2 ? '#f97316' : '#ef4444' }}>
-                       Próximos {proj.periodo}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
         {myVideos.length > 0 && (
           <div className="glass-card" style={{ marginBottom: '32px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px' }}>
@@ -467,26 +339,8 @@ export default function Dashboard() {
                     return 1;
                   };
                   
-                  const scores = {
-                    engajamento: getScore(viewToSubRatio, [10, 3, 0.5]),
-                    autoridade: getScore(viewToSubRatio, [20, 10, 3]),
-                  };
-                  
+                  const scores = { engajamento: getScore(viewToSubRatio, [10, 3, 0.5]), autoridade: getScore(viewToSubRatio, [20, 10, 3]) };
                   const getColor = (score: number) => score >= 7 ? '#4ade80' : score >= 4 ? '#fbbf24' : '#f87171';
-                  
-                  const getExplanation = (metric: string, score: number, value: number) => {
-                    if (metric === 'engajamento') {
-                      if (score >= 7) return `Excelente! ${value.toFixed(1)}% dos inscritos assistem em média.`;
-                      if (score >= 4) return `Bom. ${value.toFixed(1)}% dos inscritos assistem.`;
-                      return `Baixo. Apenas ${value.toFixed(1)}% dos inscritos assistem.`;
-                    }
-                    if (metric === 'autoridade') {
-                      if (score >= 7) return "Muito forte! Alto impacto.";
-                      if (score >= 4) return "Sólido. Continue consistentemente.";
-                      return "Necesário crescer estratégias.";
-                    }
-                    return '';
-                  };
                   
                   return (
                     <>
@@ -495,18 +349,12 @@ export default function Dashboard() {
                           <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Efeito de Engajamento</p>
                           <p style={{ color: getColor(scores.engajamento), fontSize: '1.2rem', fontWeight: 'bold' }}>{scores.engajamento}/10</p>
                         </div>
-                        <p style={{ color: '#94a3b8', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                          {getExplanation('engajamento', scores.engajamento, viewToSubRatio)}
-                        </p>
                       </div>
                       <div style={{ padding: '16px', background: 'rgba(255,255,255,0.03)', borderRadius: '12px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                           <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Autoridade do Canal</p>
                           <p style={{ color: getColor(scores.autoridade), fontSize: '1.2rem', fontWeight: 'bold' }}>{scores.autoridade}/10</p>
                         </div>
-                        <p style={{ color: '#94a3b8', fontSize: '0.8rem', lineHeight: '1.4' }}>
-                          {getExplanation('autoridade', scores.autoridade, viewToSubRatio)}
-                        </p>
                       </div>
                     </>
                   );
