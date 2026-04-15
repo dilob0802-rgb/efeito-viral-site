@@ -16,9 +16,10 @@ export default function IdeiasPage() {
   
   // Update state once session is loaded
   useEffect(() => {
-    if (session?.user) {
-      setNicho((session.user as any).niche || (session.user as any).youtubeChannelName || "");
-    }
+    // Mantendo vazio por padrão conforme solicitação do usuário
+    // if (session?.user) {
+    //   setNicho((session.user as any).niche || (session.user as any).youtubeChannelName || "");
+    // }
   }, [session]);
 
   const [loading, setLoading] = useState(false);
