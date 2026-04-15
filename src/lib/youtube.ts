@@ -307,7 +307,6 @@ export async function getMyVideos(accessToken: string): Promise<YoutubeVideoInfo
 
     const statsData = await statsResponse.json();
     if (!statsData.items) return [];
-
     return statsData.items.map((item: any) => ({
       id: item.id,
       title: item.snippet.title,
@@ -318,6 +317,8 @@ export async function getMyVideos(accessToken: string): Promise<YoutubeVideoInfo
       commentCount: item.statistics.commentCount,
       duration: item.contentDetails.duration,
     }));
+}
+
 export async function getChannelVideosRSS(channelId: string): Promise<YoutubeVideoInfo[]> {
   try {
     const response = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
