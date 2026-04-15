@@ -39,16 +39,22 @@ export default function OtimizadorPage() {
         const data = await response.json();
         
         if (data.error || !data.videos || data.videos.length === 0) {
-          if (data.error) setError(data.error);
-          
-          // Fallback para demonstração se a API falhar
+          // Fallback para demonstração se a API falhar ou quota acabar
           const mockVideos: Video[] = [
-            { id: '1', title: 'Como crescer no YouTube usando IA em 2026', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000&auto=format&fit=crop', views: '12500', publishedAt: new Date().toISOString(), titleScore: 85, thumbScore: 42, type: 'video', status: 'public' },
-            { id: '2', title: 'Dica rápida de edição de shorts viral', thumbnail: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1000&auto=format&fit=crop', views: '45000', publishedAt: new Date().toISOString(), titleScore: 92, thumbScore: 88, type: 'short', status: 'public' },
-            { id: '3', title: 'Por que seus vídeos não estão sendo recomendados?', thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1000&auto=format&fit=crop', views: '8900', publishedAt: new Date().toISOString(), titleScore: 65, thumbScore: 35, type: 'video', status: 'public' },
+            { id: '1', title: 'Como crescer no YouTube usando IA em 2026', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=1000&auto=format&fit=crop', views: '12540', publishedAt: new Date().toISOString(), titleScore: 85, thumbScore: 42, type: 'video', status: 'public' },
+            { id: '2', title: 'Dica rápida de edição de shorts viral', thumbnail: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=1000&auto=format&fit=crop', views: '45200', publishedAt: new Date().toISOString(), titleScore: 92, thumbScore: 88, type: 'short', status: 'public' },
+            { id: '3', title: 'Por que seus vídeos não estão sendo recomendados?', thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=1000&auto=format&fit=crop', views: '8910', publishedAt: new Date().toISOString(), titleScore: 65, thumbScore: 35, type: 'video', status: 'public' },
+            { id: '4', title: 'A estratégia secreta dos canais de 1M de inscritos', thumbnail: 'https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=1000&auto=format&fit=crop', views: '15600', publishedAt: new Date().toISOString(), titleScore: 78, thumbScore: 91, type: 'video', status: 'public' },
+            { id: '5', title: 'Setup minimalista para criação de conteúdo', thumbnail: 'https://images.unsplash.com/photo-1491933382434-500287f9b54b?q=80&w=1000&auto=format&fit=crop', views: '22300', publishedAt: new Date().toISOString(), titleScore: 88, thumbScore: 75, type: 'video', status: 'public' },
+            { id: '6', title: 'Como manter a retenção alta do início ao fim', thumbnail: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1000&auto=format&fit=crop', views: '34100', publishedAt: new Date().toISOString(), titleScore: 95, thumbScore: 82, type: 'video', status: 'public' },
           ];
           setVideos(mockVideos);
-          if (!data.error) setError("Modo de Demonstração: Conexão com YouTube instável.");
+          
+          if (data.error && data.error.toLowerCase().includes("quota")) {
+             setError("Modo de Demonstração Ativado: Limite de análise diária atingido. Você ainda pode testar as funcionalidades com estes exemplos.");
+          } else if (data.error) {
+             setError("Modo de Demonstração: Conexão com YouTube instável.");
+          }
         } else {
           setVideos(data.videos);
           setError(null);
