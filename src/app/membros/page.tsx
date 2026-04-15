@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import OnboardingPage from "./onboarding/page";
 import styles from "./dashboard.module.css";
-import { BarChart3, TrendingUp, Users, Video, Clock, Zap } from "lucide-react";
+import { BarChart3, TrendingUp, Users, Video, Clock, Zap, Play } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
 // Função para formatar números com segurança (lida com ranges como "0 - 100")
