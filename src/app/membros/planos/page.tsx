@@ -64,12 +64,13 @@ export default function PlanosPage() {
     {
       id: "pro_anual",
       name: "Pro Anual",
-      tagline: "O melhor custo-benefício para o seu canal",
+      tagline: "Acelere seu crescimento com economia",
       price: "397,00",
       period: "/ano",
       savings: "Economize mais de R$ 200 por ano",
       buttonText: "Assinar Anual (PROMO)",
       highlight: true,
+      badge: "MELHOR CUSTO-BENEFÍCIO",
       features: [
         ...commonFeatures,
         { icon: <Star size={16} color="#00ffcc" />, text: "Selo de Membro Pro no Perfil" },
@@ -102,6 +103,7 @@ export default function PlanosPage() {
             <div className={styles.cardInfo}>
               <div className={styles.pTitleRow}>
                 <h2 className={styles.planName}>{plan.name}</h2>
+                {plan.badge && <span className={styles.bestValueBadge}>{plan.badge}</span>}
               </div>
               <p className={styles.planTagline}>{plan.tagline}</p>
               
@@ -120,6 +122,10 @@ export default function PlanosPage() {
                   <button className={styles.currentPlanBtn} disabled>Plano Ativo</button>
                 ) : selectedPlanForPayment === plan.id ? (
                   <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className={styles.paypalContainer}>
+                    <div className={styles.paypalSkeleton}>
+                       <div className={styles.skeletonLine} />
+                       <div className={styles.skeletonLineShort} />
+                    </div>
                     <PayPalScriptProvider options={{ "client-id": process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID || "", currency: "BRL" }}>
                       <PayPalButtons 
                         style={{ layout: "vertical", shape: "pill", height: 44, color: plan.highlight ? "blue" : "gold" }}

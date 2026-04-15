@@ -15,7 +15,7 @@ export async function POST(req: Request) {
     }
 
     const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(orderID);
-    request.requestBody({});
+    request.requestBody({} as any);
 
     const response = await paypalClient.execute(request);
     

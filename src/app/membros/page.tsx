@@ -248,27 +248,27 @@ export default function Dashboard() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div>
-          <h1 className={styles.title}>Bem-vindo, {session.user?.name}! 👋</h1>
+          <h1 className={styles.title}>Bem-vindo, {session?.user?.name || "Membro"}! 👋</h1>
           <p className={styles.subtitle}>Aqui está o desempenho do seu canal hoje.</p>
         </div>
         <div className={styles.channelBadge}>
-          { (stats?.youtubeChannelAvatar || (session.user as any)?.youtubeChannelAvatar || stats?.thumbnails) ? (
+          { (stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnails) ? (
             <img 
-              src={stats?.youtubeChannelAvatar || (session.user as any).youtubeChannelAvatar || stats?.thumbnails} 
+              src={stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnails} 
               alt="Canal" 
               className={styles.avatar} 
               referrerPolicy="no-referrer"
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
-                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent((session.user as any).youtubeChannelName || stats?.title || "Canal")}&background=9d4edd&color=fff`;
+                target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent((session?.user as any)?.youtubeChannelName || stats?.title || "Canal")}&background=9d4edd&color=fff`;
               }}
             />
           ) : (
             <div className={styles.avatarPlaceholder}>
-              {((session.user as any).youtubeChannelName || stats?.title || "C").charAt(0)}
+              {((session?.user as any)?.youtubeChannelName || stats?.title || "C").charAt(0)}
             </div>
           )}
-          <span>{(session.user as any)?.youtubeChannelName || stats?.title || (loadingStats ? "Carregando..." : "Meu Canal")}</span>
+          <span>{(session?.user as any)?.youtubeChannelName || stats?.title || (loadingStats ? "Carregando..." : "Meu Canal")}</span>
         </div>
       </header>
 

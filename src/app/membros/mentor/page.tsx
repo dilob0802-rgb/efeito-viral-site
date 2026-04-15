@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import styles from "../coathing/coaching.module.css";
+import styles from "../coaching/coaching.module.css";
 import { Send, Zap, Target, BookOpen, User as UserIcon, Bot } from "lucide-react";
 
 interface Message {

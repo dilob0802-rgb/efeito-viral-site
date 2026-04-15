@@ -4,13 +4,25 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import styles from "./analise-detalhe.module.css";
 
+interface MentorAnalysis {
+  pillars: {
+    engajamento: number;
+    seo: number;
+    retencao: number;
+    consistencia: number;
+  };
+  pros: string[];
+  cons: string[];
+  markdown: string;
+}
+
 export default function AnaliseDetalhePage() {
   const { id } = useParams();
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
-  const [mentorAnalysis, setMentorAnalysis] = useState<string>("");
+  const [mentorAnalysis, setMentorAnalysis] = useState<MentorAnalysis | null>(null);
   const [error, setError] = useState("");
   const [viralScore, setViralScore] = useState(0);
 
@@ -106,7 +118,7 @@ export default function AnaliseDetalhePage() {
   const handleGenerateMentor = async () => {
     if (!id) return;
     setGenerating(true);
-    setMentorAnalysis("");
+    setMentorAnalysis(null);
 
     try {
       const res = await fetch("/api/analise/mentor", {

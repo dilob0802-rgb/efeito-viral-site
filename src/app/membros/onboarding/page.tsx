@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./onboarding.module.css";
 import { ArrowRight, ArrowLeft, Check, Target, Users, Zap, Search, AlertCircle } from "lucide-react";
@@ -36,7 +36,7 @@ export default function OnboardingPage() {
   const [searchError, setSearchError] = useState("");
 
   // Busca automática se logado via Google
-  useState(() => {
+  useEffect(() => {
     const autoFetch = async () => {
       setIsAutoFetching(true);
       try {
