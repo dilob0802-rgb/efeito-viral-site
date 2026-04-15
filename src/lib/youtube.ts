@@ -350,5 +350,47 @@ export async function getChannelVideosRSS(channelId: string): Promise<YoutubeVid
   }
 }
 
+export async function getChannelDetailsScraping(input: string): Promise<YoutubeChannelInfo | null> {
+  try {
+    let url = "";
+    if (input.startsWith("@")) url = `https://www.youtube.com/${input}/about`;
+    else if (input.startsWith("UC")) url = `https://www.youtube.com/channel/${input}/about`;
+    else url = `https://www.youtube.com/results?search_query=${encodeURIComponent(input)}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+      }
+    });
+    
+    const html = await response.text();
+    
+    // Extração básica via Regex dos metadados injetados pelo YouTube (ytInitialData)
+    const subMatch = html.match(/"subscriberCountText":\{"accessibility":\{"accessibilityData":\{"label":"(.*?)"\}\}/);
+    const viewMatch = html.match(/"viewCountText":\{"simpleText":"(.*?)"\}/);
+    const titleMatch = html.match(/"title":\{"simpleText":"(.*?)"\}/);
+    const avatarMatch = html.match(/"avatar":\{"thumbnails":\[\{"url":"(.*?)",/);
+
+    const cleanSubs = subMatch ? subMatch[1].replace(/[^0-9KMB,.]/g, '') : "0";
+    const cleanViews = viewMatch ? viewMatch[1].replace(/[^0-9]/g, '') : "0";
+
+    if (!titleMatch && !subMatch) return null;
+
+    return {
+      id: input,
+      title: titleMatch ? titleMatch[1] : input,
+      description: "",
+      customUrl: input,
+      thumbnail: avatarMatch ? avatarMatch[1] : "",
+      subscriberCount: cleanSubs,
+      videoCount: "0",
+      viewCount: cleanViews
+    };
+  } catch (error) {
+    console.error("Erro no scraping de detalhes:", error);
+    return null;
+  }
+}
+
 
 
