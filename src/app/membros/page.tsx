@@ -7,6 +7,7 @@ import OnboardingPage from "./onboarding/page";
 import styles from "./dashboard.module.css";
 import { BarChart3, TrendingUp, Users, Video, Clock, Zap, Play, Rocket, Calendar } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { calculateVideoScores } from "@/lib/scoring";
 
 // Função para formatar números com segurança (lida com ranges como "0 - 100")
 const safeFormatNumber = (val: any) => {
@@ -383,30 +384,64 @@ export default function Dashboard() {
               <h2 style={{ fontSize: '1.2rem', fontWeight: '700' }}>Meus Vídeos Recentes</h2>
             </div>
             
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '16px', marginBottom: '32px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px', marginBottom: '32px' }}>
               {myVideos.map((video: any, idx: number) => (
                 <div 
                   key={idx} 
                   onClick={() => handleVideoClick(video.id)}
-                  style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', overflow: 'hidden', textDecoration: 'none', display: 'block', transition: 'transform 0.2s', cursor: 'pointer' }}
+                  style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '16px', overflow: 'hidden', textDecoration: 'none', display: 'block', transition: 'all 0.3s ease', cursor: 'pointer', border: '1px solid rgba(255,255,255,0.05)' }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.borderColor = 'rgba(157, 78, 221, 0.3)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)';
+                    e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.03)';
+                  }}
                 >
-                  <div style={{ position: 'relative', paddingTop: '56.25%' }}>
+                  <div style={{ position: 'relative', paddingTop: '56.25%', borderRadius: '12px 12px 0 0', overflow: 'hidden' }}>
                     <img 
                       src={video.thumbnail} 
                       alt={video.title}
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                     />
-                    <span style={{ position: 'absolute', bottom: '6px', right: '6px', background: 'rgba(0,0,0,0.8)', color: '#fff', fontSize: '0.7rem', padding: '2px 6px', borderRadius: '4px' }}>
+                    <span style={{ position: 'absolute', bottom: '8px', right: '8px', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)', color: '#fff', fontSize: '0.65rem', padding: '2px 8px', borderRadius: '6px', fontWeight: 'bold' }}>
                       {video.duration || "0:00"}
                     </span>
                   </div>
+                  
                   <div style={{ padding: '12px' }}>
-                    <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: '4px' }}>
-                      {video.title}
-                    </p>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>
-                      {parseInt(video.viewCount || 0).toLocaleString()} visualizações
-                    </p>
+                    {(() => {
+                      const scores = calculateVideoScores(video.title, video.id);
+                      const getScoreColor = (s: number) => s >= 80 ? '#4ade80' : s >= 50 ? '#fbbf24' : '#f87171';
+                      
+                      return (
+                        <>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
+                            <span style={{ padding: '3px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', color: '#fff', fontSize: '0.6rem', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.1)' }}>
+                              Título <span style={{ color: getScoreColor(scores.titleScore) }}>{scores.titleScore}</span>
+                            </span>
+                            <span style={{ padding: '3px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', color: '#fff', fontSize: '0.6rem', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.1)' }}>
+                              Miniat. <span style={{ color: getScoreColor(scores.thumbScore) }}>{scores.thumbScore}</span>
+                            </span>
+                            <span style={{ padding: '3px 6px', background: 'rgba(255,255,255,0.05)', borderRadius: '6px', color: '#fff', fontSize: '0.6rem', fontWeight: 'bold', border: '1px solid rgba(255,255,255,0.1)' }}>
+                              Conteúdo <span style={{ color: getScoreColor(scores.contentScore) }}>{scores.contentScore}</span>
+                            </span>
+                          </div>
+
+                          <p style={{ color: '#fff', fontSize: '0.75rem', fontWeight: '600', lineHeight: '1.4', marginBottom: '8px', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', height: '2.1rem' }}>
+                            {video.title}
+                          </p>
+                        </>
+                      );
+                    })()}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#64748b', fontSize: '0.65rem' }}>
+                      <span>{parseInt(video.viewCount || 0).toLocaleString()} views</span>
+                      <span>•</span>
+                      <span>{video.publishedAt ? new Date(video.publishedAt).toLocaleDateString() : 'Recente'}</span>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -39,6 +39,9 @@ model User {
   // Chaves Privadas de Analytics do Google OAuth
   googleAccessToken    String?
   googleRefreshToken   String?
+  
+  isPremium          Boolean   @default(false)
+  plan               String    @default("FREE") // FREE, PREMIUM
 
   onboardingComplete Boolean   @default(false)
 

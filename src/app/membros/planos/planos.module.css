@@ -1,0 +1,260 @@
+.container {
+  padding: 80px 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #0d0d0f;
+  color: #fff;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.topSpace {
+  height: 20px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.header h1 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 12px;
+  color: #fff;
+}
+
+.header p {
+  color: #888;
+  font-size: 1.1rem;
+}
+
+/* Grid de Cards */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 60px;
+}
+
+.card {
+  background: #151518;
+  border-radius: 24px;
+  padding: 44px 32px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.cardHighlight {
+  box-shadow: 0 0 0 2px rgba(157, 78, 221, 0.4);
+  background: #151518;
+}
+
+.planName {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.planTagline {
+  color: #888;
+  font-size: 1.05rem;
+  margin-bottom: 24px;
+}
+
+/* Seletor de Canais Estilo Exemplo */
+.channelRow {
+  background: #0d0d0f;
+  padding: 4px;
+  border-radius: 12px;
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 40px;
+}
+
+.channelBadge {
+  background: #2b2b31;
+  color: #00ffcc;
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.channelBadgeDisabled {
+  color: #555;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: default;
+}
+
+/* Preço Organizado */
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
+  white-space: nowrap;
+}
+
+.priceSymbol {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.priceValue {
+  font-size: 3.8rem;
+  font-weight: 800;
+  letter-spacing: -2px;
+}
+
+.pricePeriod {
+  font-size: 1.2rem;
+  color: #888;
+  font-weight: 500;
+  margin-left: 4px;
+}
+
+.savingsText {
+  color: #00ffcc;
+  font-size: 0.9rem;
+  font-weight: 500;
+  margin-bottom: 32px;
+}
+
+/* Área de Ação e Botão Assinar */
+.actionArea {
+  margin-bottom: 40px;
+}
+
+.actionBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 100px;
+  background: #2b2b31;
+  color: #fff;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.actionBtnHighlight {
+  background: #9d4edd;
+  box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+}
+
+.actionBtn:hover {
+  filter: brightness(1.1);
+  transform: scale(1.01);
+}
+
+.currentPlanBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.03);
+  color: #666;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.cancelAnytime {
+  text-align: center;
+  color: #555;
+  font-size: 0.85rem;
+  margin-top: 12px;
+}
+
+/* Lista de Features no Estilo Foto 1 */
+.featureList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-top: 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.featureItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.featureIcon {
+  color: #00ffcc;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.featureText {
+  color: #ccc;
+  font-size: 0.95rem;
+  font-weight: 400;
+}
+
+/* Footer Enterprise */
+.enterpriseFooter {
+  color: #888;
+  font-size: 0.95rem;
+}
+
+.enterpriseLink {
+  color: #00ffcc;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.enterpriseLink:hover {
+  text-decoration: underline;
+}
+
+/* PayPal Revelado */
+.paypalContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cancelLink {
+  background: transparent;
+  border: none;
+  color: #666;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.cancelLink:hover {
+  color: #888;
+}
+
+/* Toasts */
+.toast {
+  position: fixed;
+  top: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 100px;
+  font-weight: 600;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  z-index: 1000;
+}
+
+@media (max-width: 850px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

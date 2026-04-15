@@ -14,7 +14,8 @@ import {
   GraduationCap, 
   Users, 
   LogOut,
-  ChevronDown
+  ChevronDown,
+  CreditCard
 } from "lucide-react";
 
 const menuItems = [
@@ -29,6 +30,7 @@ const menuItems = [
     { name: "Ideias Diárias", path: "/membros/ideias", icon: <Lightbulb size={20} /> },
     { name: "Aprender", path: "/membros/aprender", icon: <GraduationCap size={20} /> },
     { name: "Meu Perfil", path: "/membros/perfil", icon: <Users size={20} /> },
+    { name: "Assinatura", path: "/membros/planos", icon: <CreditCard size={20} /> },
   ]}
 ];
 
@@ -93,7 +95,9 @@ export default function Sidebar() {
           </div>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{user?.name || "Usuário"}</span>
-            <span className={styles.userRole}>Plano Pro</span>
+            <span className={styles.userRole} style={{ color: user?.isPremium ? '#00ffcc' : '#94a3b8' }}>
+              {user?.isPremium ? 'Membro PRO' : 'Plano Gratuito'}
+            </span>
           </div>
         </div>
         <button className={styles.logoutBtn} onClick={() => signOut()}>

@@ -47,7 +47,9 @@ export const authOptions: NextAuthOptions = {
           niche: user.niche,
           mainGoal: user.mainGoal,
           painPoints: user.painPoints,
-          subscribers: user.subscribers
+          subscribers: user.subscribers,
+          isPremium: user.isPremium,
+          plan: user.plan
         } as any;
       }
     }),
@@ -134,6 +136,8 @@ export const authOptions: NextAuthOptions = {
           token.youtubeChannelName = dbUser.youtubeChannelName;
           token.youtubeChannelAvatar = dbUser.youtubeChannelAvatar;
           token.subscribers = dbUser.subscribers;
+          token.isPremium = dbUser.isPremium;
+          token.plan = dbUser.plan;
         }
       }
 
@@ -167,6 +171,8 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).mainGoal = token.mainGoal;
         (session.user as any).painPoints = token.painPoints;
         (session.user as any).subscribers = token.subscribers;
+        (session.user as any).isPremium = token.isPremium;
+        (session.user as any).plan = token.plan;
       }
       return session;
     }

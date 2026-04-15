@@ -225,18 +225,18 @@
 /* Novos estilos para vídeos em alta */
 .videoGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
   animation: fadeIn 0.4s ease-out;
 }
 
 .videoCard {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 12px;
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  padding: 10px;
+  transition: all 0.2s ease;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -244,9 +244,26 @@
 
 .videoCard:hover {
   transform: translateY(-4px);
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(157, 78, 221, 0.3);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(157, 78, 221, 0.4);
+}
+
+.tagStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.scoreTag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .videoThumbWrapper {
