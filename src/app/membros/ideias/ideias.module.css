@@ -147,6 +147,86 @@
   to { transform: rotate(360deg); }
 }
 
+.ideaCardWrapper {
+  margin-bottom: 24px;
+}
+
+.generateBtn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.generateBtn:hover:not(:disabled) {
+  opacity: 0.8;
+  transform: translateY(-2px);
+}
+
+.generateBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.scriptBox {
+  background: rgba(15, 15, 20, 0.5);
+  border: 1px solid rgba(157, 78, 221, 0.2);
+  border-radius: 0 0 16px 16px;
+  margin-top: -16px; /* overlaps with the ideaCard slightly to look attached */
+  padding: 32px 24px 24px 24px;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.scriptHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  font-weight: bold;
+  color: #9d4edd;
+}
+
+.copyScriptBtn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.copyScriptBtn:hover {
+  background: var(--primary);
+}
+
+.scriptContent {
+  color: #e0e0e0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+.scriptTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--primary);
+  margin: 24px 0 8px 0;
+}
+
+.scriptLine {
+  margin-bottom: 8px;
+}
+
 @media (max-width: 768px) {
   .ideaCard {
     flex-direction: column;

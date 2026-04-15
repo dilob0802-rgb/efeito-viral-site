@@ -92,13 +92,25 @@
 .avatar {
   width: 36px;
   height: 36px;
-  background: linear-gradient(135deg, var(--primary), #5a189a);
-  border-radius: 10px;
+  background: linear-gradient(135deg, #9d4edd, #5a189a);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
   color: #fff;
+  overflow: hidden;
+}
+
+.avatarLetter {
+  font-size: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .userInfo {

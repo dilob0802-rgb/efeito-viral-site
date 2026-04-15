@@ -10,7 +10,7 @@ interface Message {
   content: string;
 }
 
-export default function MentorPage() {
+export default function CoachingPage() {
   const { data: session } = useSession();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<Message[]>([
@@ -31,9 +31,7 @@ export default function MentorPage() {
     if (!input.trim() || isTyping) return;
 
     const userMessage: Message = { role: "user", content: input };
-    const updatedMessages = [...messages, userMessage];
-
-    setMessages(updatedMessages);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
     setIsTyping(true);
 
@@ -51,10 +49,6 @@ export default function MentorPage() {
           }
         })
       });
-
-      if (!response.ok) {
-        throw new Error(`Erro na rede: ${response.statusText}`);
-      }
 
       const data = await response.json();
       if (data.reply) {
@@ -104,9 +98,9 @@ export default function MentorPage() {
         </div>
 
         <div className={styles.inputArea}>
-          <input
-            className={styles.input}
-            placeholder="Pergunte qualquer coisa sobre seu canal..."
+          <input 
+            className={styles.input} 
+            placeholder="Pergunte qualquer coisa sobre seu canal..." 
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
@@ -124,7 +118,7 @@ export default function MentorPage() {
             <Zap size={18} color="#9d4edd" />
             <h3 style={{ fontSize: '0.9rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '1px' }}>Seu Perfil</h3>
           </div>
-
+          
           <div style={{ marginBottom: '16px' }}>
             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Nicho</p>
             <span className={styles.tag}>{(session?.user as any)?.niche || "Carregando..."}</span>

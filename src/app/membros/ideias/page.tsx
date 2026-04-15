@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import styles from "./ideias.module.css";
 
 interface Idea {
@@ -10,14 +11,27 @@ interface Idea {
 }
 
 export default function IdeiasPage() {
-  const [nicho, setNicho] = useState("");
+  const { data: session } = useSession();
+  const [nicho, setNicho] = useState<string>("");
+  
+  // Update state once session is loaded
+  useEffect(() => {
+    if (session?.user) {
+      setNicho((session.user as any).niche || (session.user as any).youtubeChannelName || "");
+    }
+  }, [session]);
+
   const [loading, setLoading] = useState(false);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [error, setError] = useState("");
 
+  const [scriptLoading, setScriptLoading] = useState<string | null>(null);
+  const [scripts, setScripts] = useState<Record<string, string>>({});
+
   const handleGenerate = async () => {
     setLoading(true);
     setError("");
+    setScripts({});
     
     try {
       const res = await fetch("/api/analise/ideias", {
@@ -39,7 +53,28 @@ export default function IdeiasPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    alert("Título copiado para a área de transferência! 🔥");
+    alert("Copiado para a área de transferência! 🔥");
+  };
+
+  const handleGenerateScript = async (ideaTitle: string) => {
+    if (scripts[ideaTitle] || scriptLoading === ideaTitle) return;
+    setScriptLoading(ideaTitle);
+    try {
+      const res = await fetch("/api/analise/roteiro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: ideaTitle, nicho: nicho || "Geral" })
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      
+      setScripts(prev => ({ ...prev, [ideaTitle]: data.script }));
+    } catch (err: any) {
+      alert(err.message || "Erro ao gerar o roteiro.");
+    } finally {
+      setScriptLoading(null);
+    }
   };
 
   return (
@@ -56,7 +91,7 @@ export default function IdeiasPage() {
           placeholder="Qual é o seu nicho? (ex: Minecraft, Finanças, Culinária...)" 
           value={nicho}
           onChange={(e) => setNicho(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleGenerate()}
+          onKeyDown={(e) => e.key === 'Enter' && handleGenerate()}
         />
         <button className="btn-primary" onClick={handleGenerate} disabled={loading}>
           {loading ? "Gerando..." : "Gerar Ideias"}
@@ -75,33 +110,55 @@ export default function IdeiasPage() {
       <div className={styles.feed}>
         {ideas.length > 0 ? (
           ideas.map((idea, index) => (
-            <div key={index} className={styles.ideaCard} style={{ animationDelay: `${index * 0.1}s` }}>
-              <div className={styles.ideaMain}>
-                <span className={`${styles.predictionBadge} ${
-                  idea.prediction === "VERY HIGH" ? styles.vh : 
-                  idea.prediction === "HIGH" ? styles.h : styles.m
-                }`}>
-                  POTENCIAL {
-                    idea.prediction === "VERY HIGH" ? "MÁXIMO" : 
-                    idea.prediction === "HIGH" ? "ALTO" : "MÉDIO"
-                  }
-                </span>
-                <span className={styles.ideaTitle}>{idea.title}</span>
-                <p className={styles.why}>✨ {idea.why}</p>
+            <div key={index} className={styles.ideaCardWrapper} style={{ animationDelay: `${index * 0.1}s` }}>
+              <div className={styles.ideaCard}>
+                <div className={styles.ideaMain}>
+                  <span className={`${styles.predictionBadge} ${
+                    idea.prediction === "VERY HIGH" ? styles.vh : 
+                    idea.prediction === "HIGH" ? styles.h : styles.m
+                  }`}>
+                    POTENCIAL {
+                      idea.prediction === "VERY HIGH" ? "MÁXIMO" : 
+                      idea.prediction === "HIGH" ? "ALTO" : "MÉDIO"
+                    }
+                  </span>
+                  <span className={styles.ideaTitle}>{idea.title}</span>
+                  <p className={styles.why}>✨ {idea.why}</p>
+                </div>
+                
+                <div className={styles.actions}>
+                  <button 
+                    className={styles.generateBtn} 
+                    onClick={() => handleGenerateScript(idea.title)}
+                    disabled={scriptLoading === idea.title || !!scripts[idea.title]}
+                  >
+                    {scriptLoading === idea.title ? "Gerando..." : (scripts[idea.title] ? "Roteiro Pronto" : "Gerar Roteiro")}
+                  </button>
+                  <button 
+                    className={styles.copyBtn} 
+                    title="Copiar Título"
+                    onClick={() => copyToClipboard(idea.title)}
+                  >
+                    📋
+                  </button>
+                </div>
               </div>
               
-              <div className={styles.actions}>
-                <button 
-                  className={styles.copyBtn} 
-                  title="Copiar Título"
-                  onClick={() => copyToClipboard(idea.title)}
-                >
-                  📋
-                </button>
-                <button className={styles.copyBtn} title="Salvar Ideia">
-                  ⭐
-                </button>
-              </div>
+              {scripts[idea.title] && (
+                <div className={styles.scriptBox}>
+                  <div className={styles.scriptHeader}>
+                    <span>📝 Estrutura do Roteiro</span>
+                    <button onClick={() => copyToClipboard(scripts[idea.title])} className={styles.copyScriptBtn}>Copiar Tudo</button>
+                  </div>
+                  <div className={styles.scriptContent}>
+                    {scripts[idea.title].split('\n').map((line, i) => (
+                      <p key={i} className={line.startsWith('#') ? styles.scriptTitle : styles.scriptLine}>
+                        {line.replace(/[*#]/g, '')}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))
         ) : !loading && (

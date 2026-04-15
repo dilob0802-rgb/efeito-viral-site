@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
 
 export async function POST(req: Request) {
@@ -11,7 +11,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    const { niche, subscribers, mainGoals, painPoints, selectedMentor } = await req.json();
+    const { 
+      niche, 
+      subscribers, 
+      mainGoals, 
+      painPoints, 
+      youtubeChannelId, 
+      youtubeChannelName, 
+      youtubeChannelAvatar 
+    } = await req.json();
 
     const updatedUser = await prisma.user.update({
       where: { email: session.user.email as string },
@@ -20,7 +28,9 @@ export async function POST(req: Request) {
         subscribers,
         mainGoal: Array.isArray(mainGoals) ? mainGoals.join(", ") : mainGoals,
         painPoints: Array.isArray(painPoints) ? painPoints.join(", ") : painPoints,
-        selectedMentor,
+        youtubeChannelId,
+        youtubeChannelName,
+        youtubeChannelAvatar,
         onboardingComplete: true
       }
     });

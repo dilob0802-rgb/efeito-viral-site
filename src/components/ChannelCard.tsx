@@ -7,10 +7,11 @@ interface ChannelCardProps {
   thumbnails: string;
   subscriberCount: string;
   videoCount: string;
+  viewCount?: string;
   onSelect?: (id: string) => void;
 }
 
-export default function ChannelCard({ id, title, thumbnails, subscriberCount, videoCount }: ChannelCardProps) {
+export default function ChannelCard({ id, title, thumbnails, subscriberCount, videoCount, viewCount }: ChannelCardProps) {
   const router = useRouter();
 
   const formatNumber = (num: string) => {
@@ -20,20 +21,48 @@ export default function ChannelCard({ id, title, thumbnails, subscriberCount, vi
     return val.toString();
   };
 
+  // Cálculo visual de Força Viral simulado
+  const subValue = parseInt(subscriberCount) || 1;
+  const powerSore = Math.min(100, Math.max(10, (Math.log10(subValue) / 8) * 100)); // Escala logaritmica onde 100M = 100%
+
   return (
     <div 
       className={`glass-card ${styles.card}`} 
       onClick={() => router.push(`/membros/analise/${id}`)}
+      style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}
     >
-      <img src={thumbnails} alt={title} className={styles.avatar} />
-      <div className={styles.info}>
-        <h3 className={styles.name}>{title}</h3>
-        <div className={styles.stats}>
-          <span>👥 {formatNumber(subscriberCount)} seguidores</span>
-          <span>🎥 {formatNumber(videoCount)} vídeos</span>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <img 
+          src={thumbnails} 
+          alt={title} 
+          className={styles.avatar} 
+          referrerPolicy="no-referrer"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(title)}&background=9d4edd&color=fff`;
+          }}
+        />
+        <div className={styles.info} style={{ flex: 1 }}>
+          <h3 className={styles.name}>{title}</h3>
+          <div className={styles.stats}>
+            <span>👥 {formatNumber(subscriberCount)} seguidores</span>
+            <span>🎥 {formatNumber(videoCount)} vídeos</span>
+            {viewCount && <span>👁️ {formatNumber(viewCount)} views</span>}
+          </div>
+        </div>
+        <button className={styles.actionBtn}>Ver Raio-X</button>
+      </div>
+
+      {/* Barra de Crescimento / Poder Viral */}
+      <div style={{ width: '100%', marginTop: '8px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '4px' }}>
+          <span>Velocidade de Crescimento (IA)</span>
+          <span style={{ color: 'var(--secondary)' }}>{powerSore.toFixed(1)}/100</span>
+        </div>
+        <div style={{ width: '100%', height: '6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+          <div style={{ width: `${powerSore}%`, height: '100%', background: 'linear-gradient(90deg, var(--primary), var(--secondary))', transition: 'width 1s ease-out' }}></div>
         </div>
       </div>
-      <button className={styles.actionBtn}>Ver Raio-X</button>
     </div>
   );
 }

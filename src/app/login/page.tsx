@@ -97,6 +97,35 @@ export default function LoginPage() {
           </button>
         </form>
 
+        <div style={{ margin: '24px 0', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>OU</span>
+          <div style={{ flex: 1, height: '1px', background: 'rgba(255,255,255,0.1)' }} />
+        </div>
+
+        <button 
+          className={styles.googleBtn} 
+          onClick={() => signIn("google", { callbackUrl: "/membros" })}
+          style={{
+            width: '100%',
+            padding: '12px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.02)',
+            color: '#fff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '12px',
+            cursor: 'pointer',
+            fontWeight: '600',
+            transition: 'all 0.3s'
+          }}
+        >
+          <img src="https://www.google.com/favicon.ico" alt="Google" style={{ width: '18px' }} />
+          Entrar pelo Google
+        </button>
+
         <div className={styles.footer}>
           <p>
             Ainda não é membro? <Link href="/#inscricao">Faça sua inscrição</Link>

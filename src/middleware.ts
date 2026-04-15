@@ -27,11 +27,8 @@ export default withAuth(
       );
     }
 
-    // 3. Se estiver autenticado mas não completou o onboarding
-    const onboardingComplete = token?.onboardingComplete;
-    if (isAuth && !onboardingComplete && !isOnboardingPage && req.nextUrl.pathname.startsWith("/membros")) {
-      return NextResponse.redirect(new URL("/membros/onboarding", req.url));
-    }
+    // 3. Permite navegação livre (Onboarding será mostrado via componente quando necessário)
+    return null;
   },
   {
     callbacks: {

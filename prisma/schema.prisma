@@ -28,16 +28,40 @@ model User {
   mainGoal           String?
   painPoints         String?   // Salvo como string separada por vírgula ou JSON
   selectedMentor     String?
+  
+  // Dados do Canal Conectado
+  youtubeChannelId     String?
+  youtubeChannelName   String?
+  youtubeChannelAvatar String?
+  
+  // Chaves Privadas de Analytics do Google OAuth
+  googleAccessToken    String?
+  googleRefreshToken   String?
+
   onboardingComplete Boolean   @default(false)
 
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   competitors        Competitor[]
+  youtubeChannels    YoutubeChannel[]
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+model YoutubeChannel {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channelId       String
+  channelName     String
+  channelAvatar   String?
+  isActive        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+
+  @@unique([userId, channelId])
 }
 
 model Competitor {

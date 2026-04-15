@@ -80,6 +80,35 @@ a {
   color: #fff;
 }
 
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 8px;
+  background: rgba(157, 78, 221, 0.1);
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(157, 78, 221, 0.3);
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(157, 78, 221, 0.2);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.btn-secondary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .section {
   padding: 120px 0;
 }

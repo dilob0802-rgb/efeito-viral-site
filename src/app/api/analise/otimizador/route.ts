@@ -8,14 +8,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 export async function POST(req: Request) {
   try {
     const { videoId } = await req.json();
-    if (!videoId) return NextResponse.json({ error: "ID do vídeo é obrigatório." }, { status: 400 });
+    if (!videoId) return NextResponse.json({ error: "ID do video e obrigatorio." }, { status: 400 });
 
-    // 1. Buscar metadados do vídeo do usuário
+    // 1. Buscar metadados do video do usuario
     const videoRes = await fetch(`${YOUTUBE_API_BASE_URL}/videos?part=snippet,statistics&id=${videoId}&key=${API_KEY}`);
     const videoData = await videoRes.json();
 
     if (!videoData.items || videoData.items.length === 0) {
-      return NextResponse.json({ error: "Vídeo não encontrado." }, { status: 404 });
+      return NextResponse.json({ error: "Video nao encontrado." }, { status: 404 });
     }
 
     const video = videoData.items[0];
@@ -23,40 +23,40 @@ export async function POST(req: Request) {
     const stats = video.statistics;
 
     // 2. IA Auditoria
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
 
-    const prompt = `
-      Você é um auditor sênior de SEO para YouTube (estilo vidIQ).
-      AUDITE O SEGUINTE VÍDEO:
-      Título: "${snippet.title}"
-      Descrição: "${snippet.description}"
-      Tags Atuais: "${snippet.tags ? snippet.tags.join(", ") : "Nenhuma"}"
-      Visualizações: ${stats.viewCount}
+    const prompt = `Analise este video do YouTube como um estrategista especialista em viralizacao (estilo SrBeast/Vidiq).
+Titulo Atual: "${snippet.title}"
+Descricao Atual: "${snippet.description}"
+Visualizacoes: ${stats.viewCount}
 
-      SUA TAREFA:
-      1. Identificar 5 a 10 "Tags de Ouro" que faltam e que ajudariam este vídeo a viralizar no algoritmo.
-      2. Reescrever a descrição (apenas o primeiro parágrafo) para ser mais persuasiva e cheia de palavras-chave.
-      3. Dar uma nota de "SEO Viral" de 0 a 100.
-      4. Dar uma justificativa curta por canal.
-
-      RESPONDA APENAS EM JSON:
-      {
-        "seoScore": 85,
-        "missingTags": ["tag1", "tag2", "tag3"],
-        "optimizedDescription": "Nova descrição...",
-        "justification": "Por que o vídeo precisa disso..."
-      }
-    `;
+Retorne um JSON estritamente com esta estrutura:
+{
+  "titleScore": 0-100,
+  "thumbScore": 0-100,
+  "justificativaTitulo": "Analise tecnica curta do titulo atual",
+  "justificativaMiniatura": "Analise estrategica tecnica da thumbnail atual baseada no contexto do titulo",
+  "pontosPositivos": ["Ponto 1", "Ponto 2", "Ponto 3"],
+  "pontosNegativos": ["Ponto 1", "Ponto 2", "Ponto 3"],
+  "sugestoesTitulos": [
+    {"titulo": "Opcao Viral 1", "score": 98},
+    {"titulo": "Opcao Viral 2", "score": 95},
+    {"titulo": "Opcao Viral 3", "score": 92}
+  ],
+  "tagsSugeridas": ["tag1", "tag2", "tag3", "tag4", "tag5", "tag6", "tag7", "tag8", "tag9", "tag10", "tag11", "tag12"]
+}
+Seja critico e focado em retencao e CTR. Responda APENAS o JSON.`;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text().replace(/```json|```/g, "").trim();
+    console.log("Auditoria gerada com sucesso para:", snippet.title);
     const audit = JSON.parse(text);
 
     return NextResponse.json({
       video: {
         title: snippet.title,
-        thumbnail: snippet.thumbnails.high?.url || snippet.thumbnails.default.url,
+        thumbnail: snippet.thumbnails.maxres?.url || snippet.thumbnails.high?.url || snippet.thumbnails.default.url,
         stats: stats
       },
       audit
@@ -64,6 +64,6 @@ export async function POST(req: Request) {
 
   } catch (error: any) {
     console.error("Erro na auditoria:", error);
-    return NextResponse.json({ error: "Falha ao auditar vídeo. Verifique o ID e tente novamente." }, { status: 500 });
+    return NextResponse.json({ error: "Falha ao auditar video. Verifique o ID e tente novamente." }, { status: 500 });
   }
 }
