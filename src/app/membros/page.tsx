@@ -8,6 +8,25 @@ import styles from "./dashboard.module.css";
 import { BarChart3, TrendingUp, Users, Video, Clock, Zap } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 
+// Função para formatar números com segurança (lida com ranges como "0 - 100")
+const safeFormatNumber = (val: any) => {
+  if (!val) return "0";
+  if (typeof val === 'number') return val.toLocaleString('pt-BR');
+  
+  // Se for uma string com range (ex: "0 - 100"), tenta pegar o número mais alto ou limpa
+  const cleaned = String(val).replace(/[^0-9]/g, '');
+  const num = parseInt(cleaned);
+  return isNaN(num) ? "---" : num.toLocaleString('pt-BR');
+};
+
+const safeParseInt = (val: any, fallback = 0) => {
+  if (!val) return fallback;
+  if (typeof val === 'number') return val;
+  const cleaned = String(val).replace(/[^0-9]/g, '');
+  const num = parseInt(cleaned);
+  return isNaN(num) ? fallback : num;
+};
+
 // Funções para simular crescimento retroativo baseado no número atual
 const generateMockData = (period: string, currentValue: number) => {
   const data = [];
@@ -185,10 +204,10 @@ export default function Dashboard() {
 
     let currentValue = 0;
     const s = stats as any;
-    if (chartMetric === "Visualizações") currentValue = s?.viewCount ? parseInt(s.viewCount) : 12500;
-    else if (chartMetric === "Inscritos") currentValue = (s?.subscriberCount || s?.subscribers) ? parseInt(s.subscriberCount || s.subscribers) : 570;
-    else currentValue = s?.videoCount ? parseInt(s.videoCount) : 42;
-
+    if (chartMetric === "Visualizações") currentValue = safeParseInt(s?.viewCount, 8776);
+    else if (chartMetric === "Inscritos") currentValue = safeParseInt(s?.subscriberCount || s?.subscribers, 57);
+    else currentValue = safeParseInt(s?.videoCount, 47);
+ 
     setChartData(generateMockData(chartPeriod, currentValue));
     setUseMockData(true);
   }, [stats, chartMetric, chartPeriod, loadingStats, useMockData]);
@@ -199,7 +218,9 @@ export default function Dashboard() {
     return <OnboardingPage />;
   }
 
-  const periods = ['Tempo Real', 'Diário', 'Semanal', 'Mensal', 'Anual'];
+  const handleVideoClick = (id: string) => {
+    window.open(`https://youtube.com/watch?v=${id}`, '_blank');
+  };
 
   return (
     <div className={styles.container}>
@@ -236,7 +257,7 @@ export default function Dashboard() {
             <BarChart3 size={20} color="#9d4edd" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : stats?.viewCount ? Number(stats.viewCount).toLocaleString('pt-BR') : "0"}
+            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.viewCount)}
           </p>
           <span className={styles.statTrend}>Total acumulado</span>
         </div>
@@ -247,20 +268,20 @@ export default function Dashboard() {
             <Users size={20} color="#00ffcc" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : (stats?.subscriberCount || stats?.subscribers) ? Number(stats.subscriberCount || stats.subscribers).toLocaleString('pt-BR') : "0"}
+            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.subscriberCount || stats?.subscribers)}
           </p>
-          <span className={styles.statTrend}>Base de fãs</span>
+          <span className={styles.statTrend}>Inscritos atuais</span>
         </div>
 
         <div className={styles.statCard}>
           <div className={styles.statHeader}>
             <span className={styles.statTitle}>Vídeos Publicados</span>
-            <Video size={20} color="#ff007f" />
+            <Play size={20} color="#ff9e00" />
           </div>
           <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : (stats?.videoCount || "0")}
+            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.videoCount)}
           </p>
-          <span className={styles.statTrend}>Total postado</span>
+          <span className={styles.statTrend}>Conteúdo no ar</span>
         </div>
       </div>
 
