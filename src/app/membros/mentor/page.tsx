@@ -2,12 +2,18 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
-import styles from "../coaching/coaching.module.css";
+import styles from "../coathing/coaching.module.css";
 import { Send, Zap, Target, BookOpen, User as UserIcon, Bot } from "lucide-react";
 
 interface Message {
   role: "user" | "assistant";
   content: string;
+}
+
+interface UserProfile {
+  niche?: string;
+  mainGoal?: string;
+  painPoints?: string;
 }
 
 export default function MentorPage() {
@@ -17,7 +23,25 @@ export default function MentorPage() {
     { role: "assistant", content: "Olá! Sou seu Mentor de IA. Já analisei seu perfil e estou pronto para te ajudar a dominar o algoritmo. Sobre o que vamos falar hoje?" }
   ]);
   const [isTyping, setIsTyping] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    async function fetchProfile() {
+      try {
+        const res = await fetch("/api/user/profile");
+        const data = await res.json();
+        if (data.profile) {
+          setUserProfile(data.profile);
+        }
+      } catch (err) {
+        console.error("Erro ao buscar perfil:", err);
+      }
+    }
+    if (session?.user) {
+      fetchProfile();
+    }
+  }, [session]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -127,17 +151,17 @@ export default function MentorPage() {
 
           <div style={{ marginBottom: '16px' }}>
             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Nicho</p>
-            <span className={styles.tag}>{(session?.user as any)?.niche || "Carregando..."}</span>
+            <span className={styles.tag}>{userProfile?.niche || "Não definido"}</span>
           </div>
 
           <div style={{ marginBottom: '16px' }}>
             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Principais Objetivos</p>
-            <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{(session?.user as any)?.mainGoal || "Carregando..."}</p>
+            <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{userProfile?.mainGoal || "Não definido"}</p>
           </div>
 
           <div>
             <p style={{ fontSize: '0.8rem', color: '#94a3b8', marginBottom: '4px' }}>Desafio Atual</p>
-            <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{(session?.user as any)?.painPoints || "Carregando..."}</p>
+            <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{userProfile?.painPoints || "Não definido"}</p>
           </div>
         </div>
 
@@ -147,7 +171,9 @@ export default function MentorPage() {
             <h3 style={{ fontSize: '0.9rem', fontWeight: '700' }}>Dica do Dia</h3>
           </div>
           <p style={{ fontSize: '0.85rem', color: '#e2e8f0', lineHeight: '1.4' }}>
-            Baseado no seu objetivo de **{(session?.user as any)?.mainGoal?.split(',')[0]}**, foque em títulos que gerem curiosidade imediata nos primeiros 3 segundos.
+            {userProfile?.mainGoal 
+              ? `Baseado no seu objetivo de **${userProfile.mainGoal.split(',')[0]}**, foque em títulos que gerem curiosidade imediata nos primeiros 3 segundos.`
+              : "Complete seu perfil para receber dicas personalizadas."}
           </p>
         </div>
       </aside>
