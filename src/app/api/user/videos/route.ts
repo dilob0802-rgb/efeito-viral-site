@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import { getMyVideos } from "@/lib/youtube";
+import { getMyVideos, getChannelVideosRSS } from "@/lib/youtube";
 import { refreshAccessToken } from "@/lib/youtubeAnalytics"; // Forçando recompilação
 
 export async function GET(req: Request) {
@@ -13,12 +13,12 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    const user = await prisma.user.findUnique({
+    const userData = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: { googleAccessToken: true }
+      select: { googleAccessToken: true, youtubeChannelId: true }
     });
 
-    if (!user || !user.googleAccessToken) {
+    if (!userData || !userData.googleAccessToken) {
       return NextResponse.json({ 
         error: "Canal não conectado. Por favor, faça login com o Google para ver seus vídeos.",
         needsAuth: true 
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
     }
 
     try {
-      let accessToken = user.googleAccessToken;
+      let accessToken = userData.googleAccessToken;
       let videos = [];
       
       try {
@@ -36,7 +36,17 @@ export async function GET(req: Request) {
         if (apiError.message?.includes("401") || apiError.status === 401) {
            accessToken = await refreshAccessToken(session.user.email);
            videos = await getMyVideos(accessToken);
-        } else {
+        } 
+        // Se for erro de quota (403/429), usa o fallback RSS
+        else if (apiError.message?.toLowerCase().includes("quota") || apiError.status === 403) {
+           console.log("Quota excedida. Usando fallback RSS para canal:", userData.youtubeChannelId);
+           if (userData.youtubeChannelId) {
+             videos = await getChannelVideosRSS(userData.youtubeChannelId);
+           } else {
+             throw apiError;
+           }
+        }
+        else {
            throw apiError;
         }
       }

@@ -318,6 +318,35 @@ export async function getMyVideos(accessToken: string): Promise<YoutubeVideoInfo
       commentCount: item.statistics.commentCount,
       duration: item.contentDetails.duration,
     }));
+export async function getChannelVideosRSS(channelId: string): Promise<YoutubeVideoInfo[]> {
+  try {
+    const response = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`);
+    const xml = await response.text();
+    
+    // Parser simples via Regex
+    const entries = xml.split('<entry>');
+    entries.shift(); // Remove o header do XML
+    
+    return entries.slice(0, 15).map(entry => {
+      const videoId = entry.match(/<yt:videoId>(.*?)<\/yt:videoId>/)?.[1] || "";
+      const title = entry.match(/<title>(.*?)<\/title>/)?.[1] || "";
+      const publishedAt = entry.match(/<published>(.*?)<\/published>/)?.[1] || "";
+      const thumbnail = `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+      
+      return {
+        id: videoId,
+        title: title,
+        publishedAt: publishedAt,
+        thumbnail: thumbnail,
+        viewCount: "0",
+        likeCount: "0",
+        commentCount: "0"
+      };
+    }).filter(v => v.id !== "");
+  } catch (error) {
+    console.error("Erro ao buscar RSS:", error);
+    return [];
+  }
 }
 
 
