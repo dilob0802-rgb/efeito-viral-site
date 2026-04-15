@@ -118,6 +118,7 @@ export default function Paywall({ children, featureName = "esta ferramenta" }: P
               disabled={isProcessing}
               createOrder={(data, actions) => {
                 return actions.order.create({
+                  intent: "CAPTURE",
                   purchase_units: [{
                     amount: {
                       value: "49.90", // Valor de exemplo para o plano mensal

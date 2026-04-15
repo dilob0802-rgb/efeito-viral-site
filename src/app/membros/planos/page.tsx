@@ -130,6 +130,7 @@ export default function PlanosPage() {
                       <PayPalButtons 
                         style={{ layout: "vertical", shape: "pill", height: 44, color: plan.highlight ? "blue" : "gold" }}
                         createOrder={(data, actions) => actions.order.create({
+                          intent: "CAPTURE",
                           purchase_units: [{ amount: { value: plan.price.replace(',', '.'), currency_code: "BRL" }, description: `Efeito Viral - ${plan.name}` }]
                         })}
                         onApprove={(data) => handleCapture(data.orderID)}
