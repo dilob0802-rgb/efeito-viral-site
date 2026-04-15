@@ -393,7 +393,7 @@ export default function Dashboard() {
                 >
                   <div style={{ position: 'relative', paddingTop: '56.25%' }}>
                     <img 
-                      src={video.thumbnails} 
+                      src={video.thumbnail} 
                       alt={video.title}
                       style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }}
                     />
