@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -20,7 +20,7 @@ model User {
   name               String?
   email              String    @unique
   password           String
-  role               Role      @default(USER)
+  role               String    @default("USER") // USER, ADMIN
   
   // Dados do Perfil (Onboarding)
   niche              String?
@@ -44,16 +44,48 @@ model User {
   plan               String    @default("FREE") // FREE, PREMIUM
 
   onboardingComplete Boolean   @default(false)
+  whatsapp           String?   // Para contato direto do suporte/admin
 
   createdAt          DateTime  @default(now())
   updatedAt          DateTime  @updatedAt
   competitors        Competitor[]
   youtubeChannels    YoutubeChannel[]
+  orders             Order[]
 }
 
-enum Role {
-  USER
-  ADMIN
+model Order {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount        Float
+  currency      String   @default("BRL")
+  status        String   // COMPLETED, PENDING, FAILED
+  paypalId      String?  @unique
+  couponCode    String?
+  createdAt     DateTime @default(now())
+}
+
+model Coupon {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  discountType    String   // PERCENTAGE, FIXED
+  discountValue   Float
+  usageCount      Int      @default(0)
+  maxUsage        Int?
+  isActive        Boolean  @default(true)
+  influencerId    String?
+  influencer      Influencer? @relation(fields: [influencerId], references: [id])
+  createdAt       DateTime @default(now())
+}
+
+model Influencer {
+  id              String   @id @default(cuid())
+  name            String
+  socialHandle    String?
+  whatsapp        String?
+  commissionRate  Float    @default(0) // Porcentagem de comissão por venda
+  coupons         Coupon[]
+  createdAt       DateTime @default(now())
 }
 
 model YoutubeChannel {

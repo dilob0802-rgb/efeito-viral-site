@@ -1,53 +1,120 @@
 .container {
-  padding: 120px 24px 60px;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--background);
+  color: var(--text);
+}
+
+.sidebar {
+  width: 260px;
+  background: rgba(20, 20, 31, 0.95);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 32px 16px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.sidebarTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 40px;
+  padding-left: 12px;
+  color: #fff;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.navItemIcon {
+  width: 20px;
+  height: 20px;
+}
+
+.navItem:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.navItemActive {
+  background: rgba(157, 78, 221, 0.15);
+  color: var(--primary);
+  box-shadow: 0 0 15px rgba(157, 78, 221, 0.1);
+}
+
+.mainContent {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
 }
 
 .header {
-  margin-bottom: 48px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  margin-bottom: 40px;
 }
 
 .title {
-  font-size: 2.5rem;
+  font-size: 2rem;
+  font-weight: 800;
   margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.stats {
+.statsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 24px;
   margin-bottom: 48px;
 }
 
 .statCard {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
   padding: 24px;
   border-radius: 16px;
+  transition: transform 0.3s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-5px);
+  border-color: var(--primary);
 }
 
 .statLabel {
-  color: var(--text-muted);
   font-size: 0.875rem;
+  color: var(--text-muted);
   margin-bottom: 8px;
 }
 
 .statValue {
   font-size: 2rem;
   font-weight: 700;
-  color: var(--primary);
+  color: #fff;
 }
 
 .tableWrapper {
-  background: var(--surface);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
-  overflow-x: auto;
 }
 
 .table {
@@ -57,43 +124,64 @@
 }
 
 .table th {
-  padding: 20px 24px;
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text-muted);
-  font-weight: 600;
+  padding: 16px 24px;
+  background: rgba(255, 255, 255, 0.05);
   font-size: 0.875rem;
+  color: var(--text-muted);
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 0.05em;
 }
 
 .table td {
-  padding: 20px 24px;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--border);
-  color: #fff;
-  vertical-align: top;
+  font-size: 0.9375rem;
 }
 
-.table tr:last-child td {
-  border-bottom: none;
+.badge {
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
-.table tr:hover {
-  background: rgba(255, 255, 255, 0.01);
-}
-
-.profileLink {
+.badgePremium {
+  background: rgba(0, 255, 204, 0.1);
   color: var(--secondary);
+}
+
+.badgeFree {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.actionBtn {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.actionBtnSecondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+}
+
+.whatsappLink {
+  color: #25d366;
   text-decoration: underline;
   font-size: 0.875rem;
 }
 
-.date {
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
-
-.desafios {
-  max-width: 400px;
-  font-size: 0.875rem;
-  line-height: 1.5;
+.whatsappLink:hover {
+  color: #128c7e;
 }

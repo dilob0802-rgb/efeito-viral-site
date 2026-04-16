@@ -15,19 +15,42 @@ export async function POST(req: Request) {
     }
 
     const request = new checkoutNodeJssdk.orders.OrdersCaptureRequest(orderID);
-    request.requestBody({});
+    request.requestBody({} as any);
 
     const response = await paypalClient.execute(request);
     
     // Se o pagamento foi concluído com sucesso
     if (response.result.status === 'COMPLETED') {
-      await prisma.user.update({
-        where: { email: session.user.email },
-        data: {
-          isPremium: true,
-          plan: 'PREMIUM'
-        }
+      const user = await prisma.user.findUnique({
+        where: { email: session.user.email }
       });
+
+      if (user) {
+        const purchaseUnit = response.result.purchase_units[0];
+        const amount = parseFloat(purchaseUnit.amount.value);
+        const currency = purchaseUnit.amount.currency_code;
+
+        await prisma.$transaction([
+          prisma.user.update({
+            where: { id: user.id },
+            data: {
+              isPremium: true,
+              plan: 'PREMIUM'
+            }
+          }),
+          prisma.order.create({
+            data: {
+              userId: user.id,
+              amount: amount,
+              currency: currency,
+              status: 'COMPLETED',
+              paypalId: orderID,
+              // O código do cupom pode vir opcionalmente no corpo da requisição futuramente
+              couponCode: (await req.clone().json()).couponCode || null
+            }
+          })
+        ]);
+      }
     }
     
     return NextResponse.json({
