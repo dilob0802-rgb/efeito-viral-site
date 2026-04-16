@@ -13,12 +13,7 @@ export default async function AdminPage() {
     redirect('/admin/login');
   }
 
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { role: true }
-  });
-
-  if (user?.role !== 'ADMIN') {
+  if ((session.user as any).role !== 'ADMIN') {
     redirect('/membros');
   }
 
