@@ -421,13 +421,16 @@ export async function getChannelDetailsScraping(input: string): Promise<YoutubeC
     if (!jsonMatch) {
        // Fallback simples se o JSON falhar
        const titleMatch = html.match(/<meta name="title" content="(.*?)">/);
-       if (!titleMatch) return null;
+       const ogImageMatch = html.match(/<meta property="og:image" content="(.*?)">/);
+       
+       if (!titleMatch && !ogImageMatch) return null;
+       
        return {
          id: input,
-         title: titleMatch[1].replace(" - YouTube", ""),
+         title: titleMatch ? titleMatch[1].replace(" - YouTube", "") : input,
          description: "",
          customUrl: input,
-         thumbnail: "",
+         thumbnail: ogImageMatch ? ogImageMatch[1] : "",
          subscriberCount: "0",
          videoCount: "0",
          viewCount: "0"
@@ -457,12 +460,20 @@ export async function getChannelDetailsScraping(input: string): Promise<YoutubeC
     const viewMatch = html.match(/"viewCountText":\{"simpleText":"(.*?)"\}/);
     if (viewMatch) totalViews = viewMatch[1].replace(/[^0-9]/g, '');
 
+    let thumbnailUrl = header?.avatar?.thumbnails?.[0]?.url || metadata?.avatar?.thumbnails?.[0]?.url || "";
+    if (!thumbnailUrl || thumbnailUrl === "") {
+        const ogImageMatch = html.match(/<meta property="og:image" content="(.*?)">/);
+        if (ogImageMatch) {
+            thumbnailUrl = ogImageMatch[1];
+        }
+    }
+
     return {
       id: input,
       title: title,
       description: metadata?.description || "",
       customUrl: input,
-      thumbnail: header?.avatar?.thumbnails?.[0]?.url || metadata?.avatar?.thumbnails?.[0]?.url || "",
+      thumbnail: thumbnailUrl,
       subscriberCount: parseYtNumber(subsText),
       videoCount: "0",
       viewCount: totalViews
