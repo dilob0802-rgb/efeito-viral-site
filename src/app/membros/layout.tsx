@@ -25,7 +25,15 @@ export default function MembrosLayout({
     <div className={styles.layout}>
       {/* Mobile Toggle */}
       <div className={styles.mobileHeader}>
-        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', background: 'linear-gradient(135deg, #fff, #9d4edd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+        <div style={{ 
+          fontFamily: "'Outfit', sans-serif",
+          fontWeight: '900', 
+          fontSize: '1.2rem', 
+          letterSpacing: '0.5px',
+          background: 'linear-gradient(135deg, #fff, #9d4edd)', 
+          WebkitBackgroundClip: 'text', 
+          WebkitTextFillColor: 'transparent' 
+        }}>
           EFEITO VIRAL
         </div>
         <button className={styles.menuButton} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>

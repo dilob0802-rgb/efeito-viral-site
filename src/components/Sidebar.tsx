@@ -15,7 +15,8 @@ import {
   Users, 
   LogOut,
   ChevronDown,
-  CreditCard
+  CreditCard,
+  X
 } from "lucide-react";
 
 const menuItems = [
@@ -46,10 +47,16 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
 
       <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
       <div className={styles.logoContainer}>
-        <Link href="/" className={styles.logo}>
-          EFEITO VIRAL
-        </Link>
-        <span className={styles.badge}>PRO</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+          <Link href="/" className={styles.logo}>
+            EFEITO VIRAL <span className={styles.badge}>PRO</span>
+          </Link>
+          {onClose && (
+            <button className={styles.closeMobile} onClick={onClose}>
+              <X size={20} />
+            </button>
+          )}
+        </div>
       </div>
 
       <nav className={styles.nav}>

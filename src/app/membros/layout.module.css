@@ -20,28 +20,40 @@
   display: none;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background-color: #0c0c14;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 12px 20px;
+  background-color: rgba(12, 12, 20, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(157, 78, 221, 0.2);
   position: sticky;
   top: 0;
-  z-index: 90;
+  z-index: 95;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .menuButton {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   color: #fff;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.menuButton:active {
+  transform: scale(0.9);
+  background: rgba(157, 78, 221, 0.2);
 }
 
 @media (max-width: 1024px) {
   .main {
     margin-left: 0;
-    padding: 20px;
+    padding: 24px 16px;
   }
 
   .mobileHeader {
