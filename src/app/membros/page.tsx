@@ -108,11 +108,13 @@ export default function Dashboard() {
           try {
             const ytRes = await fetch('/api/analise/youtube?channelId=mine');
             const ytData = await ytRes.json();
-            if (ytData.statistics) {
+            if (ytData.id) {
               setStats({
-                viewCount: ytData.statistics.viewCount,
-                subscriberCount: ytData.statistics.subscriberCount,
-                videoCount: ytData.statistics.videoCount
+                ...stats,
+                youtubeChannelAvatar: ytData.thumbnail,
+                viewCount: ytData.statistics?.viewCount,
+                subscriberCount: ytData.statistics?.subscriberCount,
+                videoCount: ytData.statistics?.videoCount
               });
             }
           } catch (e) {
@@ -252,9 +254,9 @@ export default function Dashboard() {
           <p className={styles.subtitle}>Aqui está o desempenho do seu canal hoje.</p>
         </div>
         <div className={styles.channelBadge}>
-          { (stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnails) ? (
+          { (stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnail) ? (
             <img 
-              src={stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnails} 
+              src={stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnail} 
               alt="Canal" 
               className={styles.avatar} 
               referrerPolicy="no-referrer"
