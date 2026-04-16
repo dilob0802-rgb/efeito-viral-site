@@ -55,6 +55,8 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           onboardingComplete: user.onboardingComplete,
+          isPremium: true,
+          plan: "PRO",
           youtubeChannelId: user.youtubeChannelId,
           youtubeChannelName: user.youtubeChannelName,
           youtubeChannelAvatar: user.youtubeChannelAvatar,
@@ -151,12 +153,24 @@ export const authOptions: NextAuthOptions = {
             token.youtubeChannelName = dbUser.youtubeChannelName;
             token.youtubeChannelAvatar = dbUser.youtubeChannelAvatar;
             token.subscribers = dbUser.subscribers;
-            token.isPremium = dbUser.isPremium;
-            token.plan = dbUser.plan;
+            // ACESSO LIBERADO: Forçamos premium para todos temporariamente
+            token.isPremium = true;
+            token.plan = "PRO";
+          } else {
+            // Se o usuário não estiver no banco (ex: login google novo), também damos PRO
+            token.isPremium = true;
+            token.plan = "PRO";
           }
         } catch (error) {
           console.error("Erro no DB durante o JWT (ignorado para não derrubar o login):", error);
+          // Em caso de erro de banco, ainda assim damos PRO
+          token.isPremium = true;
+          token.plan = "PRO";
         }
+      } else if (token.email?.toLowerCase() === "admin@efeitoviral.com") {
+        // Garantia para o admin também
+        token.isPremium = true;
+        token.plan = "PRO";
       }
 
       if (account && account.provider === "google" && token.email) {

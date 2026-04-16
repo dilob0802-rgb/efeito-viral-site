@@ -35,7 +35,7 @@ const menuItems = [
 
 const profileLinks = [
   { name: "Meu Perfil", path: "/membros/perfil", icon: <User size={18} /> },
-  { name: "Assinatura", path: "/membros/planos", icon: <CreditCard size={18} /> },
+  // { name: "Assinatura", path: "/membros/planos", icon: <CreditCard size={18} /> },
 ];
 
 export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
