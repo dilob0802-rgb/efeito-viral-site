@@ -44,7 +44,6 @@ export default function PlanosPage() {
     { icon: <Sparkles size={16} />, text: "Acesso total ao Otimizador de IA" },
     { icon: <Zap size={16} />, text: "Busca Viral Ilimitada" },
     { icon: <Target size={16} />, text: "Ideias de vídeo ilimitadas" },
-    { icon: <Video size={16} />, text: "Thumbnails virais em segundos" },
     { icon: <MessageSquare size={16} />, text: "Mentor IA disponível 24h" },
     { icon: <LineChart size={16} />, text: "Insights profundos de concorrência" }
   ];
