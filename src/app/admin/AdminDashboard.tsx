@@ -122,9 +122,9 @@ function UsersList() {
 
   useEffect(() => {
     fetch('/api/admin/users').then(r => r.json()).then(data => {
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data : []);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   const togglePremium = async (userId: string, current: boolean) => {
@@ -139,6 +139,7 @@ function UsersList() {
   return (
     <div>
       <h2 className={styles.title}>Gestão de Usuários</h2>
+      {loading ? <p>Carregando...</p> : (
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
@@ -182,9 +183,11 @@ function UsersList() {
                 </td>
               </tr>
             ))}
+            {users.length === 0 && <tr><td colSpan={6} style={{textAlign: 'center', padding: '20px'}}>Nenhum dado encontrado</td></tr>}
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
@@ -196,9 +199,13 @@ function LeadsList() {
   useEffect(() => {
     fetch('/api/admin/users').then(r => r.json()).then(data => {
       // Filtrar apenas usuários que converteram (não premium)
-      setLeads(data.filter((u: any) => !u.isPremium));
+      if (Array.isArray(data)) {
+         setLeads(data.filter((u: any) => !u.isPremium) as any);
+      } else {
+         setLeads([]);
+      }
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
   }, []);
 
   return (
@@ -206,6 +213,7 @@ function LeadsList() {
       <h2 className={styles.title}>Leads de Cadastro (Gargalo)</h2>
       <p className="text-muted" style={{ marginBottom: '24px' }}>Usuários que criaram conta mas ainda não assinaram o Pro.</p>
       
+      {loading ? <p>Carregando...</p> : (
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
@@ -236,9 +244,11 @@ function LeadsList() {
                 </td>
               </tr>
             ))}
+            {leads.length === 0 && <tr><td colSpan={4} style={{textAlign: 'center', padding: '20px'}}>Nenhum lead encontrado</td></tr>}
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
@@ -246,10 +256,15 @@ function LeadsList() {
 function InfluencerManager() {
   const [influencers, setInfluencers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: '', socialHandle: '', whatsapp: '', commissionRate: 0 });
 
   const loadInfluencers = () => {
-    fetch('/api/admin/influencers').then(r => r.json()).then(setInfluencers);
+    setLoading(true);
+    fetch('/api/admin/influencers').then(r => r.json()).then(data => {
+        setInfluencers(Array.isArray(data) ? data : []);
+        setLoading(false);
+    }).catch(() => setLoading(false));
   };
 
   useEffect(() => {
@@ -291,6 +306,7 @@ function InfluencerManager() {
         </div>
       )}
 
+      {loading ? <p>Carregando...</p> : (
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
@@ -318,9 +334,11 @@ function InfluencerManager() {
                 </td>
               </tr>
             ))}
+            {influencers.length === 0 && <tr><td colSpan={5} style={{textAlign: 'center', padding: '20px'}}>Nenhum parceiro encontrado</td></tr>}
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
@@ -329,15 +347,26 @@ function CouponManager() {
   const [coupons, setCoupons] = useState([]);
   const [influencers, setInfluencers] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ code: '', discountType: 'PERCENTAGE', discountValue: 0, influencerId: '' });
 
   const loadData = async () => {
-    const [cRes, iRes] = await Promise.all([
-      fetch('/api/admin/coupons'),
-      fetch('/api/admin/influencers')
-    ]);
-    setCoupons(await cRes.json());
-    setInfluencers(await iRes.json());
+    setLoading(true);
+    try {
+        const [cRes, iRes] = await Promise.all([
+          fetch('/api/admin/coupons'),
+          fetch('/api/admin/influencers')
+        ]);
+        const cData = await cRes.json();
+        const iData = await iRes.json();
+        setCoupons(Array.isArray(cData) ? cData : []);
+        setInfluencers(Array.isArray(iData) ? iData : []);
+    } catch(e) {
+        setCoupons([]);
+        setInfluencers([]);
+    } finally {
+        setLoading(false);
+    }
   };
 
   useEffect(() => { loadData(); }, []);
@@ -387,6 +416,7 @@ function CouponManager() {
         </div>
       )}
 
+      {loading ? <p>Carregando...</p> : (
       <div className={styles.tableWrapper}>
         <table className={styles.table}>
           <thead>
@@ -412,9 +442,11 @@ function CouponManager() {
                 </td>
               </tr>
             ))}
+            {coupons.length === 0 && <tr><td colSpan={5} style={{textAlign: 'center', padding: '20px'}}>Nenhum cupom encontrado</td></tr>}
           </tbody>
         </table>
       </div>
+      )}
     </div>
   );
 }
