@@ -18,8 +18,10 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Credenciais inválidas");
         }
 
-        // ACESSO MESTRE DE EMERGÊNCIA (Ignora banco de dados se coincidir)
-        if (credentials.email === "admin@efeitoviral.com" && credentials.password === "admin123") {
+        // ACESSO MESTRE DE EMERGÊNCIA (Normalizado para evitar erros de digitação)
+        const emailInput = credentials.email.trim().toLowerCase();
+        
+        if (emailInput === "admin@efeitoviral.com" && credentials.password === "admin123") {
           return {
             id: "system-admin-efeito",
             email: "admin@efeitoviral.com",
