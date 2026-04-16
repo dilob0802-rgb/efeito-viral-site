@@ -27,22 +27,18 @@ export default function MentoriaPage() {
   const steps = [
     {
       title: "Etapa 01: Posicionamento",
-      description: "Definição de nicho, público-alvo e construção de uma identidade visual e tom de voz únicos.",
       icon: <Compass className="w-8 h-8 text-cyan-400" />
     },
     {
       title: "Etapa 02: Produção",
-      description: "Planejamento editorial estratégico e técnicas de storytelling para conteúdos irreais.",
       icon: <Monitor className="w-8 h-8 text-purple-400" />
     },
     {
       title: "Etapa 03: Crescimento",
-      description: "Análise de métricas, uso de trends e estratégias de alcance para escalar sua audiência.",
       icon: <TrendingUp className="w-8 h-8 text-pink-400" />
     },
     {
       title: "Etapa 04: Escala",
-      description: "Monetização avançada, parcerias e consolidação como referência absoluta no seu nicho.",
       icon: <Zap className="w-8 h-8 text-yellow-400" />
     }
   ];
@@ -130,7 +126,6 @@ export default function MentoriaPage() {
                   {step.icon}
                 </div>
                 <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-                <p className="text-gray-400 text-sm leading-relaxed">{step.description}</p>
               </motion.div>
             ))}
           </div>
