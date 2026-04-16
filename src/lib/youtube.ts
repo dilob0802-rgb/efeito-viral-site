@@ -89,20 +89,31 @@ export async function getChannelDetails(input: string): Promise<YoutubeChannelIn
 
   console.log("getChannelDetails chamado com:", input);
   
+  let searchInput = input.trim();
+
+  // 1. Extrair ID ou Handle de URLs comuns do YouTube
+  const channelUrlMatch = searchInput.match(/youtube\.com\/(?:channel\/|c\/|user\/|@|)([^/?#\s]+)/i);
+  if (channelUrlMatch) {
+    searchInput = channelUrlMatch[1];
+    // Se extraiu de um link com @, garante que tenha o @ no início para a lógica abaixo
+    if (input.includes("/@") && !searchInput.startsWith("@")) {
+      searchInput = "@" + searchInput;
+    }
+  }
+
   let url = `${YOUTUBE_API_BASE_URL}/channels?part=snippet,statistics`;
   
   // Se começar com @, busca por handle
-  if (input.startsWith("@")) {
-    url += `&forHandle=${input.substring(1)}`;
+  if (searchInput.startsWith("@")) {
+    url += `&forHandle=${searchInput.substring(1)}`;
   } 
   // Se for um ID de canal (começa com UC)
-  else if (/^UC[a-zA-Z0-9_-]{22}$/.test(input)) {
-    url += `&id=${input}`;
+  else if (/^UC[a-zA-Z0-9_-]{22}$/.test(searchInput)) {
+    url += `&id=${searchInput}`;
   }
   // Se for um ID de vídeo (11 caracteres), busca o canal primeiro
-  else if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
-    // Busca o vídeo para obter o channelId
-    const videoRes = await fetch(`${YOUTUBE_API_BASE_URL}/videos?part=snippet&id=${input}&key=${API_KEY}`);
+  else if (/^[a-zA-Z0-9_-]{11}$/.test(searchInput)) {
+    const videoRes = await fetch(`${YOUTUBE_API_BASE_URL}/videos?part=snippet&id=${searchInput}&key=${API_KEY}`);
     const videoData = await videoRes.json();
     if (videoData.items && videoData.items.length > 0) {
       const channelId = videoData.items[0].snippet.channelId;
@@ -112,7 +123,7 @@ export async function getChannelDetails(input: string): Promise<YoutubeChannelIn
   }
   // Caso contrário, tenta buscar por nome (busca genérica)
   else {
-    url = `${YOUTUBE_API_BASE_URL}/search?part=snippet&q=${encodeURIComponent(input)}&type=channel&maxResults=1&key=${API_KEY}`;
+    url = `${YOUTUBE_API_BASE_URL}/search?part=snippet&q=${encodeURIComponent(searchInput)}&type=channel&maxResults=1&key=${API_KEY}`;
   }
   
   url += `&key=${API_KEY}`;
@@ -124,7 +135,7 @@ export async function getChannelDetails(input: string): Promise<YoutubeChannelIn
     
     if (!data.items || data.items.length === 0) {
       // Tenta uma busca genérica se não achou por ID/Handle
-      const searchRes = await fetch(`${YOUTUBE_API_BASE_URL}/search?part=snippet&q=${encodeURIComponent(input)}&type=channel&maxResults=1&key=${API_KEY}`);
+      const searchRes = await fetch(`${YOUTUBE_API_BASE_URL}/search?part=snippet&q=${encodeURIComponent(searchInput)}&type=channel&maxResults=1&key=${API_KEY}`);
       const searchData = await searchRes.json();
       if (searchData.items && searchData.items.length > 0) {
         return getChannelDetails(searchData.items[0].id.channelId);
@@ -425,6 +436,3 @@ export async function getChannelDetailsScraping(input: string): Promise<YoutubeC
     return null;
   }
 }
-
-
-
