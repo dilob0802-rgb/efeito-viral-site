@@ -11,7 +11,36 @@
   z-index: 100;
   padding: 20px 8px; /* Menos padding lateral para os itens respirarem */
   color: #fff;
-  transition: all 0.3s ease;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.open {
+  transform: translateX(0) !important;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 95;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+    z-index: 1000;
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+  }
 }
 
 .logoContainer {

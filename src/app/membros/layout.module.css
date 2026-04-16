@@ -1,0 +1,50 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+  background-color: #050508;
+  position: relative;
+}
+
+.main {
+  flex: 1;
+  margin-left: 240px;
+  padding: 40px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.mobileHeader {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background-color: #0c0c14;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  position: sticky;
+  top: 0;
+  z-index: 90;
+}
+
+.menuButton {
+  background: transparent;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1024px) {
+  .main {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .mobileHeader {
+    display: flex;
+  }
+}

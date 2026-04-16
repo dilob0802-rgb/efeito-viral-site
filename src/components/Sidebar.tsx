@@ -34,13 +34,17 @@ const menuItems = [
   ]}
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const user = session?.user as any;
 
   return (
-    <aside className={styles.sidebar}>
+    <>
+      {/* Overlay for mobile */}
+      {isOpen && <div className={styles.overlay} onClick={onClose} />}
+
+      <aside className={`${styles.sidebar} ${isOpen ? styles.open : ""}`}>
       <div className={styles.logoContainer}>
         <Link href="/" className={styles.logo}>
           EFEITO VIRAL
@@ -105,5 +109,6 @@ export default function Sidebar() {
         </button>
       </div>
     </aside>
+    </>
   );
 }

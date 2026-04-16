@@ -157,3 +157,39 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+@media (max-width: 640px) {
+  .onboardingCard {
+    padding: 24px 16px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .optionButton {
+    padding: 14px 16px;
+    font-size: 0.9rem;
+  }
+
+  .footer {
+    margin-top: 24px;
+    flex-direction: column-reverse;
+    gap: 12px;
+  }
+
+  .nextButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .backButton {
+    width: 100%;
+    text-align: center;
+  }
+}

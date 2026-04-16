@@ -1,31 +1,41 @@
-import Sidebar from "@/components/Sidebar";
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function MembrosLayout({
+import Sidebar from "@/components/Sidebar";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import styles from "./layout.module.css";
+
+export default function MembrosLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession(authOptions);
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
-  if (!session) {
-    redirect("/login");
+  if (status === "unauthenticated") {
+    router.push("/login");
+    return null;
   }
 
-  // Layout unificado com Sidebar sempre visível, como solicitado
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#050508' }}>
-      <Sidebar />
-      <main style={{ 
-        flex: 1, 
-        marginLeft: '260px', 
-        padding: '40px',
-        color: '#fff',
-        display: 'flex',
-        flexDirection: 'column'
-      }}>
+    <div className={styles.layout}>
+      {/* Mobile Toggle */}
+      <div className={styles.mobileHeader}>
+        <div style={{ fontWeight: 'bold', fontSize: '1.2rem', background: 'linear-gradient(135deg, #fff, #9d4edd)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+          EFEITO VIRAL
+        </div>
+        <button className={styles.menuButton} onClick={() => setIsSidebarOpen(!isSidebarOpen)}>
+          {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      </div>
+
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      
+      <main className={styles.main}>
         {children}
       </main>
     </div>
