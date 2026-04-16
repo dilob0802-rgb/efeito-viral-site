@@ -22,17 +22,22 @@ export default function AdminLoginPage() {
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        email,
+        email: email.trim().toLowerCase(),
         password,
       });
 
       if (result?.error) {
-        setError("Acesso negado. Credenciais inválidas.");
+        if (result.error === "CredentialsSignin") {
+            setError("E-mail ou senha inválidos.");
+        } else {
+            setError(result.error || "Acesso negado.");
+        }
       } else {
         router.push("/admin");
       }
-    } catch (err) {
-      setError("Erro ao autenticar. Tente novamente.");
+    } catch (err: any) {
+      console.error("Login Error:", err);
+      setError("Falha na conexão com o servidor.");
     } finally {
       setLoading(false);
     }
