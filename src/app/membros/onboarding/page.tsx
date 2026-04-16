@@ -48,7 +48,7 @@ export default function OnboardingPage() {
               ...prev,
               youtubeChannelId: channel.id,
               youtubeChannelName: channel.title,
-              youtubeChannelAvatar: channel.thumbnails,
+              youtubeChannelAvatar: channel.thumbnail,
               subscribers: channel.subscriberCount // Já pega os inscritos reais!
             }));
             // Pula as etapas automáticas
@@ -102,7 +102,7 @@ export default function OnboardingPage() {
           ...data,
           youtubeChannelId: topChannel.id,
           youtubeChannelName: topChannel.title,
-          youtubeChannelAvatar: topChannel.thumbnails
+          youtubeChannelAvatar: topChannel.thumbnail
         });
       } else {
         setSearchError("Canal não encontrado. Tente digitar apenas o @ ou o nome.");
