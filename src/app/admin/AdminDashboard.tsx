@@ -117,7 +117,7 @@ export default function AdminDashboard() {
 // COMPONENTES DE SUB-VIEWS (Simplificados para esta etapa)
 
 function UsersList() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -193,7 +193,7 @@ function UsersList() {
 }
 
 function LeadsList() {
-  const [leads, setLeads] = useState([]);
+  const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -254,7 +254,7 @@ function LeadsList() {
 }
 
 function InfluencerManager() {
-  const [influencers, setInfluencers] = useState([]);
+  const [influencers, setInfluencers] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ name: '', socialHandle: '', whatsapp: '', commissionRate: 0 });
@@ -344,8 +344,8 @@ function InfluencerManager() {
 }
 
 function CouponManager() {
-  const [coupons, setCoupons] = useState([]);
-  const [influencers, setInfluencers] = useState([]);
+  const [coupons, setCoupons] = useState<any[]>([]);
+  const [influencers, setInfluencers] = useState<any[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [formData, setFormData] = useState({ code: '', discountType: 'PERCENTAGE', discountValue: 0, influencerId: '' });
