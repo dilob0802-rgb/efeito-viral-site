@@ -93,9 +93,6 @@ export default function MentoriaPage() {
 
         <div className="container mx-auto px-6 text-center">
           <motion.div {...fadeIn}>
-            <span className="inline-block px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 text-purple-300 text-xs font-bold tracking-wider mb-6">
-              PROGRAMA HIGH TICKET EXCLUSIVO
-            </span>
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 leading-[1.1]">
               Transforme Seguidores em <br /> <span className="text-white">Renda Recorrente</span>
             </h1>
