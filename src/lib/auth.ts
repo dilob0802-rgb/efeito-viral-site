@@ -140,18 +140,22 @@ export const authOptions: NextAuthOptions = {
       }
 
       // Sincronizar dados do banco para o token (garante imagem/nome atualizados)
-      if (token.email) {
-        const dbUser = await prisma.user.findUnique({
-          where: { email: token.email as string }
-        });
-        if (dbUser) {
-          token.onboardingComplete = dbUser.onboardingComplete;
-          token.youtubeChannelId = dbUser.youtubeChannelId;
-          token.youtubeChannelName = dbUser.youtubeChannelName;
-          token.youtubeChannelAvatar = dbUser.youtubeChannelAvatar;
-          token.subscribers = dbUser.subscribers;
-          token.isPremium = dbUser.isPremium;
-          token.plan = dbUser.plan;
+      if (token.email && token.email.toLowerCase() !== "admin@efeitoviral.com") {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: token.email as string }
+          });
+          if (dbUser) {
+            token.onboardingComplete = dbUser.onboardingComplete;
+            token.youtubeChannelId = dbUser.youtubeChannelId;
+            token.youtubeChannelName = dbUser.youtubeChannelName;
+            token.youtubeChannelAvatar = dbUser.youtubeChannelAvatar;
+            token.subscribers = dbUser.subscribers;
+            token.isPremium = dbUser.isPremium;
+            token.plan = dbUser.plan;
+          }
+        } catch (error) {
+          console.error("Erro no DB durante o JWT (ignorado para não derrubar o login):", error);
         }
       }
 
