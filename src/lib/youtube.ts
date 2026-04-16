@@ -134,12 +134,31 @@ export async function getChannelDetails(input: string): Promise<YoutubeChannelIn
     console.log("API Response:", data.error || "OK");
     
     if (!data.items || data.items.length === 0) {
+      console.log("Tentando fallback para busca geral...");
       // Tenta uma busca genérica se não achou por ID/Handle
       const searchRes = await fetch(`${YOUTUBE_API_BASE_URL}/search?part=snippet&q=${encodeURIComponent(searchInput)}&type=channel&maxResults=1&key=${API_KEY}`);
       const searchData = await searchRes.json();
+      
       if (searchData.items && searchData.items.length > 0) {
         return getChannelDetails(searchData.items[0].id.channelId);
       }
+
+      // Última tentativa: forUsername (para canais antigos)
+      const userRes = await fetch(`${YOUTUBE_API_BASE_URL}/channels?part=snippet,statistics&forUsername=${encodeURIComponent(searchInput.replace("@", ""))}&key=${API_KEY}`);
+      const userData = await userRes.json();
+      if (userData.items && userData.items.length > 0) {
+        return {
+          id: userData.items[0].id,
+          title: userData.items[0].snippet.title,
+          description: userData.items[0].snippet.description,
+          customUrl: userData.items[0].snippet.customUrl,
+          thumbnail: userData.items[0].snippet.thumbnails?.high?.url || userData.items[0].snippet.thumbnails?.medium?.url || userData.items[0].snippet.thumbnails?.default?.url || "",
+          subscriberCount: userData.items[0].statistics?.subscriberCount || "0",
+          videoCount: userData.items[0].statistics?.videoCount || "0",
+          viewCount: userData.items[0].statistics?.viewCount || "0",
+        };
+      }
+      
       return null;
     }
 
