@@ -63,9 +63,7 @@ export const authOptions: NextAuthOptions = {
           niche: user.niche,
           mainGoal: user.mainGoal,
           painPoints: user.painPoints,
-          subscribers: user.subscribers,
-          isPremium: user.isPremium,
-          plan: user.plan
+          subscribers: user.subscribers
         } as any;
       }
     }),
