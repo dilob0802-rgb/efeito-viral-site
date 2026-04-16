@@ -1,141 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;800&display=swap');
+@import "tailwindcss";
 
-:root {
-  --background: #0c0c14; /* Cor idêntica à Sidebar para harmonia total */
-  --surface: #14141f;
-  --surface-hover: #1c1c2b;
-  --primary: #9d4edd;
-  --primary-glow: rgba(157, 78, 221, 0.4);
-  --secondary: #00ffcc; /* neon accent */
-  --text: #ffffff;
-  --text-muted: #94a3b8;
-  --border: rgba(255, 255, 255, 0.05);
+@theme {
+  /* Fontes Customizadas */
+  --font-outfit: "Outfit", sans-serif;
+  --font-inter: "Inter", sans-serif;
+
+  /* Teia de Cores Efeito Viral */
+  --color-background: #0c0c14;
+  --color-surface: #14141f;
+  --color-primary: #9d4edd;
+  --color-secondary: #00ffcc;
+  --color-text-muted: #94a3b8;
+  --color-border-subtle: rgba(255, 255, 255, 0.05);
+
+  /* Efeitos Especiais */
+  --radius-xl: 1rem;
+  --radius-2xl: 1.5rem;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  * {
+    @apply border-border-subtle box-border m-0 p-0;
+  }
+
+  body {
+    @apply bg-background text-white font-inter antialiased overflow-x-hidden;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-outfit;
+  }
 }
 
-body {
-  background-color: var(--background);
-  color: var(--text);
-  font-family: 'Inter', sans-serif;
-  line-height: 1.6;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+/* Utilitários Customizados para LPs */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-linear-to-br from-white to-zinc-500;
+  }
 
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Outfit', sans-serif;
-}
+  .text-gradient-primary {
+    @apply bg-clip-text text-transparent bg-linear-to-br from-primary to-secondary;
+  }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 24px;
-}
-
-.text-gradient {
-  background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.text-gradient-primary {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.btn-primary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 32px;
-  border-radius: 8px;
-  background: var(--primary);
-  color: #000;
-  font-weight: 700;
-  font-size: 1.125rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 0 20px var(--primary-glow);
-  border: none;
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 30px var(--primary-glow);
-  background: #b57eed;
-  color: #fff;
-}
-
-.btn-secondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 12px 24px;
-  border-radius: 8px;
-  background: rgba(157, 78, 221, 0.1);
-  color: var(--primary);
-  font-weight: 600;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(157, 78, 221, 0.3);
-  cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: rgba(157, 78, 221, 0.2);
-  color: #fff;
-  border-color: var(--primary);
-  transform: translateY(-2px);
-}
-
-.btn-secondary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.section {
-  padding: 120px 0;
-}
-
-.grid {
-  display: grid;
-}
-
-.flex {
-  display: flex;
-}
-
-.glass-card {
-  background: rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 16px;
-  padding: 32px;
-  transition: transform 0.3s ease, border-color 0.3s ease;
-}
-
-.glass-card:hover {
-  transform: translateY(-5px);
-  border-color: rgba(157, 78, 221, 0.4);
+  .glass-card {
+    @apply bg-white/2 backdrop-blur-xl border border-white/5 rounded-2xl;
+  }
+  
+  .glass-card-hover {
+    @apply hover:translate-y-[-5px] hover:border-primary/40 transition-all duration-300;
+  }
 }
