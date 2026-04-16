@@ -21,7 +21,7 @@ import {
 
 const menuItems = [
   { group: "Principal", items: [
-    { name: "Deskboard", path: "/membros", icon: <Home size={20} /> },
+    { name: "Dashboard", path: "/membros", icon: <Home size={20} /> },
     { name: "Otimizador Pro", path: "/membros/otimizador", icon: <Settings size={20} /> },
     { name: "Busca Viral", path: "/membros/analise", icon: <Hash size={20} /> },
   ]},
@@ -30,9 +30,12 @@ const menuItems = [
     { name: "Comparador", path: "/membros/comparador", icon: <Eye size={20} /> },
     { name: "Ideias Diárias", path: "/membros/ideias", icon: <Lightbulb size={20} /> },
     { name: "Aprender", path: "/membros/aprender", icon: <GraduationCap size={20} /> },
-    { name: "Meu Perfil", path: "/membros/perfil", icon: <Users size={20} /> },
-    { name: "Assinatura", path: "/membros/planos", icon: <CreditCard size={20} /> },
   ]}
+];
+
+const profileLinks = [
+  { name: "Meu Perfil", path: "/membros/perfil", icon: <User size={18} /> },
+  { name: "Assinatura", path: "/membros/planos", icon: <CreditCard size={18} /> },
 ];
 
 export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
@@ -85,6 +88,22 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
       </nav>
 
       <div className={styles.footer}>
+        <div className={styles.profileActions}>
+          {profileLinks.map((link) => {
+            const isActive = pathname === link.path;
+            return (
+              <Link
+                key={link.name}
+                href={link.path}
+                className={`${styles.navLink} ${styles.smallLink} ${isActive ? styles.active : ""}`}
+              >
+                <span className={styles.icon}>{link.icon}</span>
+                <span className={styles.name}>{link.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+
         <div className={styles.userCard}>
           <div className={styles.avatar}>
             {user?.youtubeChannelAvatar ? (
