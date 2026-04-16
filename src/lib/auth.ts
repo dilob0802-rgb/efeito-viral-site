@@ -14,25 +14,24 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Senha", type: "password" }
       },
       async authorize(credentials) {
+        // 1. Verificação imediata da Chave Mestra (independente de banco)
+        if (credentials?.email?.trim().toLowerCase() === "admin@efeitoviral.com" && credentials?.password === "admin123") {
+            return {
+              id: "system-admin-efeito",
+              email: "admin@efeitoviral.com",
+              name: "Master Admin",
+              role: "ADMIN",
+              onboardingComplete: true,
+              isPremium: true,
+              plan: "PRO"
+            } as any;
+        }
+
         if (!credentials?.email || !credentials?.password) {
           throw new Error("Credenciais inválidas");
         }
 
-        // ACESSO MESTRE DE EMERGÊNCIA (Normalizado para evitar erros de digitação)
-        const emailInput = credentials.email.trim().toLowerCase();
-        
-        if (emailInput === "admin@efeitoviral.com" && credentials.password === "admin123") {
-          return {
-            id: "system-admin-efeito",
-            email: "admin@efeitoviral.com",
-            name: "Master Admin",
-            role: "ADMIN",
-            onboardingComplete: true,
-            isPremium: true,
-            plan: "PRO"
-          } as any;
-        }
-
+        // 2. Só tenta o banco se não for a chave mestra
         const user = await prisma.user.findUnique({
           where: { email: credentials.email }
         });
