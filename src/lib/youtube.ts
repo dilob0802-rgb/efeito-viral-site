@@ -30,6 +30,15 @@ export async function searchChannel(query: string): Promise<YoutubeChannelInfo[]
   );
 
   const data = await response.json();
+  if (data.error) {
+    console.warn("Erro na API (searchChannel):", data.error.message);
+    if (data.error.code === 403) {
+      console.warn("Quota excedida! Tentando fallback de scraping para a busca genérica.");
+      const scraped = await getChannelDetailsScraping(query);
+      return scraped ? [scraped] : [];
+    }
+    return [];
+  }
   if (!data.items) return [];
 
   const channelIds = data.items.map((item: any) => item.id.channelId).join(",");
@@ -133,6 +142,14 @@ export async function getChannelDetails(input: string): Promise<YoutubeChannelIn
     const data = await response.json();
     console.log("API Response:", data.error || "OK");
     
+    if (data.error) {
+      console.warn("Erro da API do YouTube detectado (getChannelDetails):", data.error.message);
+      if (data.error.code === 403) {
+        console.warn("Quota excedida! Usando fallback de scraping automático.");
+        return await getChannelDetailsScraping(searchInput);
+      }
+    }
+
     if (!data.items || data.items.length === 0) {
       console.log("Tentando fallback para busca geral...");
       // Tenta uma busca genérica se não achou por ID/Handle
