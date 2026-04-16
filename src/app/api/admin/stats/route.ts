@@ -6,6 +6,14 @@ import { authOptions } from '@/lib/auth';
 async function isAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return false;
+  
+  // Bypass da Chave Mestra para APIs
+  if (session.user.email.toLowerCase() === "admin@efeitoviral.com") return true;
+
+  // Usa o role da sessão se já estiver lá
+  if ((session.user as any).role === 'ADMIN') return true;
+
+  // Fallback caso a role não esteja na sessão
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: { role: true }

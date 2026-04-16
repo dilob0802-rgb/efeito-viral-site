@@ -8,6 +8,9 @@ async function isAdmin() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) return false;
   
+  if (session.user.email.toLowerCase() === "admin@efeitoviral.com") return true;
+  if ((session.user as any).role === 'ADMIN') return true;
+
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
     select: { role: true }
