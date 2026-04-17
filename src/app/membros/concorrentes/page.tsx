@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { 
   Search, 
   MoreHorizontal, 
@@ -10,7 +10,11 @@ import {
   Eye,
   Users,
   Video,
-  ChevronDown
+  ChevronDown,
+  Plus,
+  Trash2,
+  Loader2,
+  AlertCircle
 } from "lucide-react";
 import {
   LineChart,
@@ -23,66 +27,114 @@ import {
   Legend
 } from "recharts";
 import styles from "./concorrentes.module.css";
-
-// MOCK DATA
-const mockVideos = [
-  {
-    id: "1",
-    title: "Por Que Quem Cresce Incomoda Quem Não Quer Crescer - Claudio Duarte",
-    channel: "Pr Claudio Duarte",
-    subs: "1,6 mi subs",
-    views: "14.100",
-    time: "2 dias atrás",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg"
-  },
-  {
-    id: "2",
-    title: "Assista o vídeo completo no link abaixo 👇",
-    channel: "Fe Alves",
-    subs: "1,4 mi subs",
-    views: "838",
-    time: "um dia atrás",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg"
-  },
-  {
-    id: "3",
-    title: "Dica de ouro para crescer no Youtube",
-    channel: "Victor Benecke :)",
-    subs: "1 mil assinantes",
-    views: "606",
-    time: "2 dias atrás",
-    thumb: "https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg"
-  }
-];
-
-const mockChartData = [
-  { name: "02/17", alvaro: 10, lisandro: 5, amanda: 20 },
-  { name: "03/04", alvaro: 15, lisandro: 25, amanda: 40 },
-  { name: "03/18", alvaro: 12, lisandro: 15, amanda: 30 },
-  { name: "04/01", alvaro: 35, lisandro: 20, amanda: 80 },
-  { name: "04/13", alvaro: 25, lisandro: 45, amanda: 50 },
-];
-
-const mockCompetitors = [
-  { id: "1", name: "Álvaro Medeiros", subs: "5,5 mil assinantes", color: "#8b5cf6" },
-  { id: "2", name: "LISANDRO DIAS", subs: "368 assinantes", color: "#3b82f6" },
-  { id: "3", name: "Amanda Fitas", subs: "161 mil assinantes", color: "#ec4899" },
-  { id: "4", name: "Isabela Louzada", subs: "1,6 mil assinantes", color: "#10b981" },
-  { id: "5", name: "Mariana Vabo", subs: "235 mil assinantes", color: "#f59e0b" },
-];
-
-const mockStats = [
-  { name: "Pr Claudio Duarte", totalViews: "104 mi", weekly: "188 mil", trend: "+8,9%", up: true },
-  { name: "Fe Alves", totalViews: "65 mi", weekly: "615 mil", trend: "+11,1%", up: true },
-  { name: "Mariana Vabo", totalViews: "55 mi", weekly: "66 mil", trend: "+2,7%", up: true },
-  { name: "Meta Mente", totalViews: "1,6 mi", weekly: "21 mil", trend: "-3,8%", up: false },
-];
+import { useSession } from "next-auth/react";
 
 export default function ConcorrentesPage() {
+  const { data: session } = useSession();
+  const [competitors, setCompetitors] = useState<any[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   const [includeMyChannel, setIncludeMyChannel] = useState(true);
   const [normalizeData, setNormalizeData] = useState(true);
   const [activeMetric, setActiveMetric] = useState("Visualizações");
   const [timeRange, setTimeRange] = useState("60 Dias");
+  const [selectedChannelId, setSelectedChannelId] = useState<string | null>(null);
+
+  const fetchCompetitors = useCallback(async () => {
+    try {
+      const res = await fetch("/api/concorrentes");
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setCompetitors(data);
+        
+        // Se tiver competidores e nada selecionado, buscar vídeos do primeiro
+        if (data.length > 0 && !selectedChannelId) {
+            setSelectedChannelId(data[0].channelId);
+            fetchVideos(data[0].channelId);
+        }
+      }
+    } catch (err) {
+      console.error("Erro ao carregar concorrentes:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [selectedChannelId]);
+
+  const fetchVideos = async (channelId: string) => {
+    setSelectedChannelId(channelId);
+    try {
+      const res = await fetch(`/api/concorrentes/videos?channelId=${channelId}`);
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setVideos(data.slice(0, 5)); // Mostrar top 5
+      }
+    } catch (err) {
+      console.error("Erro ao carregar vídeos:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCompetitors();
+  }, [fetchCompetitors]);
+
+  const handleAddCompetitor = async () => {
+    if (!searchQuery) return;
+    setIsAdding(true);
+    try {
+      const res = await fetch("/api/concorrentes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channelId: searchQuery })
+      });
+      const data = await res.json();
+      if (data.error) {
+        alert(data.error);
+      } else {
+        setSearchQuery("");
+        fetchCompetitors();
+      }
+    } catch (err) {
+      console.error("Erro ao adicionar:", err);
+      alert("Erro ao buscar o canal. Verifique o link ou @handle.");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleRemoveCompetitor = async (id: string, name: string) => {
+    if (!confirm(`Deseja parar de seguir ${name}?`)) return;
+    try {
+      await fetch(`/api/concorrentes?id=${id}`, { method: "DELETE" });
+      if (selectedChannelId === competitors.find(c => c.id === id)?.channelId) {
+          setVideos([]);
+          setSelectedChannelId(null);
+      }
+      fetchCompetitors();
+    } catch (err) {
+      console.error("Erro ao remover:", err);
+    }
+  };
+
+  // Formatar dados para o gráfico
+  const chartData = competitors.length > 0 && competitors[0].history ? competitors[0].history.map((h: any, i: number) => {
+    const point: any = { name: new Date(h.date).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) };
+    competitors.forEach(comp => {
+        if (comp.history && comp.history[i]) {
+            point[comp.name] = comp.history[i].subsCount;
+        }
+    });
+    return point;
+  }) : [];
+
+  if (loading) {
+    return (
+      <div className={styles.container} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '80vh' }}>
+        <Loader2 className="animate-spin" size={48} color="#3b82f6" />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -96,7 +148,7 @@ export default function ConcorrentesPage() {
           {/* Vídeos Mais Populares */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
-              <h2 className={styles.cardTitle}>Vídeos mais populares dos seus concorrentes</h2>
+              <h2 className={styles.cardTitle}>Vídeos mais populares dos concorrentes</h2>
               <div className={styles.filters}>
                 <div className={styles.toggleWrapper}>
                   <label className={styles.switch}>
@@ -105,27 +157,25 @@ export default function ConcorrentesPage() {
                   </label>
                   <span>Incluir meu canal</span>
                 </div>
-                <div className="dropdown-dummy" style={{ background: 'rgba(255,255,255,0.05)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  Visualizações <ChevronDown size={14} />
-                </div>
-                <div className="dropdown-dummy" style={{ background: 'rgba(255,255,255,0.05)', padding: '8px 12px', borderRadius: '8px', fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  Esta semana <ChevronDown size={14} />
-                </div>
               </div>
             </div>
 
             <div className={styles.videoList}>
-              {mockVideos.map(video => (
+              {videos.length > 0 ? videos.map(video => (
                 <div key={video.id} className={styles.videoItem}>
-                  <img src={video.thumb} alt={video.title} className={styles.videoThumb} />
+                  <img src={video.thumbnail} alt={video.title} className={styles.videoThumb} />
                   <div className={styles.videoInfo}>
                     <h3 className={styles.videoTitle}>{video.title}</h3>
-                    <p className={styles.videoMeta}>{video.channel} • {video.subs}</p>
-                    <p className={styles.videoMeta}>{video.time}</p>
+                    <p className={styles.videoMeta}>{new Date(video.publishedAt).toLocaleDateString('pt-BR')}</p>
                   </div>
-                  <div className={styles.videoViews}>{video.views}</div>
+                  <div className={styles.videoViews}>{parseInt(video.viewCount).toLocaleString('pt-BR')} visualizações</div>
                 </div>
-              ))}
+              )) : (
+                <div style={{ textAlign: 'center', padding: '40px', color: '#64748b' }}>
+                    <Video size={40} style={{ margin: '0 auto 16px', opacity: 0.3 }} />
+                    <p>Selecione um concorrente ao lado para ver seus vídeos mais populares.</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -136,28 +186,13 @@ export default function ConcorrentesPage() {
                 <h2 className={styles.cardTitle}>Comparar desempenho</h2>
                 <HelpCircle size={16} color="#64748b" />
               </div>
-              <div className={styles.filters}>
-                {["30 Dias", "60 Dias", "12 Meses"].map(range => (
-                  <button 
-                    key={range}
-                    className={`${styles.chartTab} ${timeRange === range ? styles.chartTabActive : ""}`}
-                    onClick={() => setTimeRange(range)}
-                    style={{ background: 'none', border: 'none', outline: 'none' }}
-                  >
-                    {range}
-                  </button>
-                ))}
-              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr', gap: '32px' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: '24px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {[
-                  { id: 'vis', label: 'Visualizações', icon: <Eye size={16} /> },
                   { id: 'sub', label: 'Assinantes', icon: <Users size={16} /> },
-                  { id: 'vid', label: 'Vídeos públicos', icon: <Video size={16} /> },
-                  { id: 'avg_vis', label: 'Média diária de visualizações' },
-                  { id: 'avg_sub', label: 'Média de assinantes / dia' },
+                  { id: 'vis', label: 'Visualizações', icon: <Eye size={16} /> },
                 ].map(metric => (
                   <button
                     key={metric.id}
@@ -170,7 +205,7 @@ export default function ConcorrentesPage() {
                       borderRadius: '8px',
                       border: 'none',
                       background: activeMetric === metric.label ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                      color: activeMetric === metric.label ? '#3b82f6' : '#64748b',
+                      color: activeMetric === metric.label ? '#3b82f6' : '#94a3b8',
                       fontSize: '0.85rem',
                       textAlign: 'left',
                       cursor: 'pointer',
@@ -184,37 +219,66 @@ export default function ConcorrentesPage() {
               </div>
 
               <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px' }}>
-                  <div className={styles.filters} style={{ background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '8px' }}>
-                    {["Diariamente", "Cumulativo", "Total"].map(t => (
-                      <button key={t} style={{ padding: '6px 16px', borderRadius: '6px', border: 'none', background: t === "Diariamente" ? 'rgba(255,255,255,0.05)' : 'transparent', color: t === "Diariamente" ? '#fff' : '#64748b', fontSize: '0.85rem', cursor: 'pointer' }}>{t}</button>
-                    ))}
-                  </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+                    <div className={styles.filters} style={{ background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '8px' }}>
+                        {["30 Dias", "60 Dias", "12 Meses"].map(range => (
+                        <button 
+                            key={range}
+                            onClick={() => setTimeRange(range)}
+                            style={{ 
+                                padding: '6px 16px', 
+                                border: 'none', 
+                                background: timeRange === range ? 'rgba(255,255,255,0.06)' : 'transparent',
+                                color: timeRange === range ? '#fff' : '#64748b',
+                                borderRadius: '6px',
+                                fontSize: '0.8rem',
+                                cursor: 'pointer'
+                            }}
+                        >
+                            {range}
+                        </button>
+                        ))}
+                    </div>
                   <div className={styles.toggleWrapper}>
                     <label className={styles.switch}>
                       <input type="checkbox" checked={normalizeData} onChange={() => setNormalizeData(!normalizeData)} />
                       <span className={styles.slider}></span>
                     </label>
-                    <span>Normalizar dados</span>
-                    <HelpCircle size={14} color="#64748b" />
+                    <span>Normalizar</span>
                   </div>
                 </div>
 
                 <div className={styles.chartContainer}>
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={mockChartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                      <XAxis dataKey="name" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
-                      <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
-                      <Tooltip 
-                        contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
-                        itemStyle={{ color: '#fff' }}
-                      />
-                      <Line type="monotone" dataKey="alvaro" stroke="#8b5cf6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="lisandro" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                      <Line type="monotone" dataKey="amanda" stroke="#ec4899" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
+                  {chartData.length > 0 ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis dataKey="name" stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#475569" fontSize={12} tickLine={false} axisLine={false} />
+                        <Tooltip 
+                          contentStyle={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '12px' }}
+                          itemStyle={{ color: '#fff' }}
+                        />
+                        <Legend />
+                        {competitors.map((comp, idx) => (
+                           <Line 
+                            key={comp.id}
+                            type="monotone" 
+                            dataKey={comp.name} 
+                            stroke={idx === 0 ? "#8b5cf6" : idx === 1 ? "#3b82f6" : idx === 2 ? "#ec4899" : "#10b981"} 
+                            strokeWidth={3} 
+                            dot={{ r: 4 }} 
+                            activeDot={{ r: 6 }} 
+                           />
+                        ))}
+                      </LineChart>
+                    </ResponsiveContainer>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748b', gap: '12px' }}>
+                        <TrendingUp size={40} style={{ opacity: 0.2 }} />
+                        <p>Aguardando dados de crescimento.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -224,44 +288,35 @@ export default function ConcorrentesPage() {
           <div className={styles.card}>
             <div className={styles.cardHeader}>
                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <h2 className={styles.cardTitle}>Estatísticas do canal</h2>
-                <HelpCircle size={16} color="#64748b" />
+                <h2 className={styles.cardTitle}>Tabela Comparativa</h2>
               </div>
-            </div>
-            <div className="filter-chip" style={{ background: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: 'fit-content', padding: '8px 16px', borderRadius: '8px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-              Visualizações <ChevronDown size={14} />
             </div>
 
             <div className={styles.statsTableWrapper}>
               <table className={styles.statsTable}>
                 <thead>
                   <tr>
-                    <th>Canal <ChevronDown size={14} /></th>
-                    <th>Visualizações totais <ChevronDown size={14} /></th>
-                    <th>Esta semana <ChevronDown size={14} /></th>
-                    <th>vs. Semana anterior <ChevronDown size={14} /></th>
+                    <th>Canal</th>
+                    <th>Inscritos</th>
+                    <th>Views Totais</th>
+                    <th>Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {mockStats.map((stat, i) => (
-                    <tr key={i}>
+                  {competitors.map((comp) => (
+                    <tr key={comp.id} style={{ opacity: selectedChannelId === comp.channelId ? 1 : 0.8 }}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <div className={styles.channelAvatar}></div>
-                          <span style={{ color: '#fff', fontWeight: '600' }}>{stat.name}</span>
+                          <img src={comp.avatar || ""} className={styles.channelAvatar} alt="" />
+                          <span style={{ color: '#fff', fontWeight: '700', fontSize: '0.9rem' }}>{comp.name}</span>
                         </div>
                       </td>
-                      <td style={{ color: '#fff' }}>{stat.totalViews}</td>
+                      <td style={{ color: '#fff' }}>{comp.subsCount?.toLocaleString('pt-BR')}</td>
+                      <td style={{ color: '#fff' }}>{parseInt(comp.viewCount || "0").toLocaleString('pt-BR')}</td>
                       <td>
-                        <div className={stat.up ? styles.trendUp : styles.trendDown}>
-                          {stat.up ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
-                          {stat.weekly}
-                        </div>
-                      </td>
-                      <td>
-                        <div className={stat.up ? styles.trendUp : styles.trendDown}>
-                          {stat.trend}
-                        </div>
+                        <button onClick={() => handleRemoveCompetitor(comp.id, comp.name)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer', padding: '8px' }}>
+                            <Trash2 size={18} />
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -274,31 +329,63 @@ export default function ConcorrentesPage() {
 
         {/* Sidebar Selector */}
         <aside className={styles.sidebarSelector}>
-          <div className={styles.card} style={{ padding: '20px' }}>
-            <h3 className={styles.cardTitle} style={{ fontSize: '1rem', marginBottom: '20px' }}>Adicionar concorrentes</h3>
+          <div className={styles.card} style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <h3 className={styles.cardTitle} style={{ fontSize: '1.1rem' }}>Adicionar Concorrente</h3>
             
             <div className={styles.search}>
               <Search className={styles.searchIcon} size={18} />
-              <input type="text" className={styles.searchInput} placeholder="Canais de pesquisa..." />
+              <input 
+                type="text" 
+                className={styles.searchInput} 
+                placeholder="Ex: @danielsaboya ou link do canal" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddCompetitor()}
+              />
+              <button 
+                onClick={handleAddCompetitor}
+                disabled={isAdding}
+                style={{ 
+                    position: 'absolute', 
+                    right: '4px', 
+                    top: '4px', 
+                    bottom: '4px', 
+                    background: '#3b82f6', 
+                    border: 'none', 
+                    borderRadius: '8px', 
+                    padding: '0 12px', 
+                    color: '#fff',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    transition: 'all 0.2s',
+                    opacity: isAdding ? 0.7 : 1
+                }}
+              >
+                {isAdding ? <Loader2 className="animate-spin" size={16} /> : <Plus size={18} />}
+              </button>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '20px', marginBottom: '16px' }}>
-              <input type="checkbox" defaultChecked />
-              <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: '600' }}>Selecionar tudo</span>
-            </div>
-
-            <div className={styles.channelList}>
-              {mockCompetitors.map(channel => (
-                <div key={channel.id} className={styles.channelItem}>
-                  <input type="checkbox" defaultChecked />
-                  <div className={styles.channelAvatar} style={{ background: channel.color + '22', border: `1px solid ${channel.color}` }}></div>
-                  <div className={styles.channelInfo}>
-                    <span className={styles.channelName}>{channel.name}</span>
-                    <span className={styles.channelSubs}>{channel.subs}</span>
-                  </div>
-                  <MoreHorizontal size={18} color="#64748b" />
+            <div>
+                <h4 style={{ fontSize: '0.75rem', color: '#64748b', textTransform: 'uppercase', marginBottom: '16px', letterSpacing: '1px' }}>Canais Monitorados</h4>
+                <div className={styles.channelList}>
+                {competitors.length > 0 ? competitors.map(channel => (
+                    <div 
+                        key={channel.id} 
+                        className={`${styles.channelItem} ${selectedChannelId === channel.channelId ? styles.activeChannel : ""}`} 
+                        onClick={() => fetchVideos(channel.channelId)}
+                        style={{ border: selectedChannelId === channel.channelId ? '1px solid rgba(59, 130, 246, 0.3)' : '1px solid transparent' }}
+                    >
+                    <img src={channel.avatar || ""} className={styles.channelAvatar} style={{ scale: '0.8', border: `2px solid #3b82f6` }} alt="" />
+                    <div className={styles.channelInfo}>
+                        <span className={styles.channelName}>{channel.name}</span>
+                        <span className={styles.channelSubs}>{channel.subsCount?.toLocaleString('pt-BR')} subs</span>
+                    </div>
+                    </div>
+                )) : (
+                    <p style={{ fontSize: '0.85rem', color: '#64748b', textAlign: 'center', padding: '20px' }}>Nenhum canal monitorado.</p>
+                )}
                 </div>
-              ))}
             </div>
           </div>
         </aside>

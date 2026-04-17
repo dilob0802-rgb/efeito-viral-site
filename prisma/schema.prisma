@@ -105,15 +105,32 @@ model Competitor {
   id              String   @id @default(cuid())
   userId          String
   user            User     @relation(fields: [userId], references: [id])
-  username        String
-  platform        String   // instagram, tiktok, youtube
-  followersCount  Int?
-  engagementRate  Float?
+  name            String
+  username        String?  // Handle (@username)
+  channelId       String?  // YouTube Channel ID
+  avatar          String?
+  platform        String   // youtube, instagram, tiktok
+  subsCount       Int?     // Subscribers or Followers
+  viewCount       BigInt?  // Total views
+  videoCount      Int?
+  
   lastAnalysed    DateTime?
   createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  history         CompetitorHistory[]
   analyses        Analysis[]
 
-  @@unique([userId, username, platform])
+  @@unique([userId, channelId, platform])
+}
+
+model CompetitorHistory {
+  id              String   @id @default(cuid())
+  competitorId    String
+  competitor      Competitor @relation(fields: [competitorId], references: [id], onDelete: Cascade)
+  subsCount       Int
+  viewCount       BigInt
+  date            DateTime @default(now())
 }
 
 model Analysis {
