@@ -3,6 +3,7 @@
   min-height: 100vh;
   background-color: #050508;
   position: relative;
+  flex-direction: row;
 }
 
 .main {
@@ -21,14 +22,25 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
-  background-color: rgba(12, 12, 20, 0.8);
+  background-color: #0c0c14;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(157, 78, 221, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 95;
+  width: 100%;
+  height: 64px;
+  box-sizing: border-box;
+  z-index: 1000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.mobileTitle {
+  font-family: 'Outfit', sans-serif;
+  font-weight: 900;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #fff, #9d4edd);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .menuButton {
@@ -51,12 +63,21 @@
 }
 
 @media (max-width: 1024px) {
+  .layout {
+    flex-direction: column;
+  }
+
   .main {
     margin-left: 0;
-    padding: 24px 16px;
+    padding: 20px 16px;
+    width: 100%;
+    box-sizing: border-box;
+    display: block; /* Garante que filhos não sejam flex side-by-side se não desejado */
   }
 
   .mobileHeader {
     display: flex;
+    position: sticky;
+    top: 0;
   }
 }
