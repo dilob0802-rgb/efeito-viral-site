@@ -65,19 +65,14 @@ export default function ComparadorPage() {
     setData(null);
 
     try {
-      // Pequeno utilitário para extrair ID do link se necessário
       const getCleanId = (input: string) => {
         let clean = input.trim();
-        // URL completa do tipo youtube.com/watch?v=xxxxx
         if (clean.includes("youtube.com/watch?v=")) {
           const match = clean.match(/v=([a-zA-Z0-9_-]+)/);
           if (match) return match[1];
         }
-        // Channel URL
         if (clean.includes("youtube.com/channel/")) clean = clean.split("/channel/")[1].split("/")[0].split("?")[0];
-        // Handle URL
         else if (clean.includes("youtube.com/@")) clean = "@" + clean.split("/@")[1].split("/")[0].split("?")[0];
-        // Short URL
         else if (clean.includes("youtu.be/")) clean = clean.split("youtu.be/")[1].split("/")[0].split("?")[0];
         return clean;
       };
@@ -103,30 +98,21 @@ export default function ComparadorPage() {
     }
   };
 
-  const getPercentage = (val: string, max: number) => {
-    const num = parseInt(val);
-    if (isNaN(num)) return 5;
-    const perc = (num / max) * 100;
-    return Math.max(perc, 5);
+  const getThumbnailUrl = (channelData: any) => {
+    if (!channelData || !channelData.thumbnails) return "https://www.youtube.com/img/channel_avatar/placeholder.png";
+    const thumbs = channelData.thumbnails;
+    if (typeof thumbs === 'string') return thumbs;
+    return thumbs.high?.url || thumbs.medium?.url || thumbs.default?.url || "https://www.youtube.com/img/channel_avatar/placeholder.png";
   };
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}>
+        <div className={styles.titleWrapper}>
           <h1 className={styles.title}>Arena de Concorrentes ⚔️</h1>
           <button 
+            className={styles.infoBtn}
             onClick={() => setShowCriterios(true)}
-            style={{ 
-              background: 'rgba(255,255,255,0.1)', 
-              border: 'none', 
-              borderRadius: '50%', 
-              width: '32px', 
-              height: '32px', 
-              color: '#fff', 
-              fontSize: '1rem',
-              cursor: 'pointer'
-            }}
             title="Ver critérios de análise"
           >?</button>
         </div>
@@ -134,30 +120,26 @@ export default function ComparadorPage() {
       </header>
 
       <section className={styles.searchArena}>
-        <div className={styles.searchBox}>
-          <input 
-            type="text" 
-            className={styles.searchInput} 
-            placeholder="ID ou Link do Canal A..." 
-            value={channelA}
-            onChange={(e) => setChannelA(e.target.value)}
-          />
-        </div>
+        <input 
+          type="text" 
+          className={styles.searchInput} 
+          placeholder="ID ou Link do Canal A..." 
+          value={channelA}
+          onChange={(e) => setChannelA(e.target.value)}
+        />
         <div className={styles.vsCircle}>VS</div>
-        <div className={styles.searchBox}>
-          <input 
-            type="text" 
-            className={styles.searchInput} 
-            placeholder="ID ou Link do Canal B..." 
-            value={channelB}
-            onChange={(e) => setChannelB(e.target.value)}
-          />
-        </div>
+        <input 
+          type="text" 
+          className={styles.searchInput} 
+          placeholder="ID ou Link do Canal B..." 
+          value={channelB}
+          onChange={(e) => setChannelB(e.target.value)}
+        />
       </section>
 
       {!data && !loading && (
-        <div className="glass-card" style={{ padding: '80px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--text-muted)' }}>Digite os links dos canais acima para iniciar a análise estratégica.</p>
+        <div className={`${styles.placeholderCard} glass-card`}>
+          <p className={styles.placeholderText}>Digite os links dos canais acima para iniciar a análise estratégica.</p>
           <button className={`btn-primary ${styles.duelBtn}`} onClick={handleDuel}>
             INICIAR DUELO
           </button>
@@ -166,7 +148,10 @@ export default function ComparadorPage() {
 
       {loading && (
         <div className={styles.fightOverlay}>
-          <div className={styles.loadingText}>ANALISANDO DADOS... O MENTOR ESTÁ DECIDINDO O VENCEDOR...</div>
+          <div className={styles.loadingWrapper}>
+            <div className={styles.loadingText}>ANALISANDO DADOS... O MENTOR ESTÁ DECIDINDO O VENCEDOR...</div>
+            <div className="loader"></div>
+          </div>
         </div>
       )}
 
@@ -177,73 +162,82 @@ export default function ComparadorPage() {
           <div className={styles.duelGrid}>
             {/* Canal A */}
             <div className={`glass-card ${styles.fighterCard} ${data.winner === 'A' ? styles.winnerEffect : ''}`}>
-              {data.winner === 'A' && <span className={styles.winnerBadge}>🏆 Vencedor</span>}
+              {data.winner === 'A' && (
+                <div className={styles.winnerBadge}>
+                  <span>🏆 VENCEDOR</span>
+                </div>
+              )}
               <div className={styles.fighterHeader}>
-                <img src={data.canalA.thumbnails || "https://www.youtube.com/img/channel_avatar/placeholder.png"} className={styles.avatar} alt="" />
+                <div className={styles.avatarWrapper}>
+                  <img 
+                    src={getThumbnailUrl(data.canalA)} 
+                    className={styles.avatar} 
+                    alt={data.canalA.title} 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://www.youtube.com/img/channel_avatar/placeholder.png";
+                    }}
+                  />
+                </div>
                 <span className={styles.fighterName}>{data.canalA.title}</span>
               </div>
 
-              <div style={{ marginTop: '16px' }}>
-                {/* Notas */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Engajamento</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisA?.scores?.engagement || 0}/10</p>
+              <div className={styles.metricsSection}>
+                <div className={styles.scoresGrid}>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Engajamento</p>
+                    <p className={styles.scoreValue}>{data.analysisA?.scores?.engagement || 0}/10</p>
                   </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Consistência</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisA?.scores?.consistency || 0}/10</p>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Consistência</p>
+                    <p className={styles.scoreValue}>{data.analysisA?.scores?.consistency || 0}/10</p>
                   </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Base Total</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisA?.scores?.growth || 0}/10</p>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Base Total</p>
+                    <p className={styles.scoreValue}>{data.analysisA?.scores?.growth || 0}/10</p>
                   </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Autoridade</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisA?.scores?.authority || 0}/10</p>
-                  </div>
-                </div>
-
-                {/* Crescimento Estimado */}
-                <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(0,242,255,0.05)', borderRadius: '8px' }}>
-                  <p style={{ color: '#00ffcc', fontSize: '0.75rem', fontWeight: '600', marginBottom: '8px' }}>CRESCIMENTO ESTIMADO</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', textAlign: 'center' }}>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Dia</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisA?.growthEstimate?.daily || 0}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Semana</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisA?.growthEstimate?.weekly || 0}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Mês</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisA?.growthEstimate?.monthly || 0}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Ano</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisA?.growthEstimate?.yearly || 0}</p>
-                    </div>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Autoridade</p>
+                    <p className={styles.scoreValue}>{data.analysisA?.scores?.authority || 0}/10</p>
                   </div>
                 </div>
 
-                {/* Pontos Positivos */}
-                <div style={{ marginBottom: '12px' }}>
-                  <p style={{ color: '#4ade80', fontSize: '0.85rem', fontWeight: '600', marginBottom: '8px' }}>✓ Pontos Positivos</p>
-                  <ul style={{ margin: 0, paddingLeft: '16px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                <div className={styles.estimateBox}>
+                  <p className={styles.estimateTitle}>CRESCIMENTO ESTIMADO</p>
+                  <div className={styles.estimateGrid}>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Dia</span>
+                      <span className={styles.estValue}>+{data.analysisA?.growthEstimate?.daily || 0}</span>
+                    </div>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Semana</span>
+                      <span className={styles.estValue}>+{data.analysisA?.growthEstimate?.weekly || 0}</span>
+                    </div>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Mês</span>
+                      <span className={styles.estValue}>+{data.analysisA?.growthEstimate?.monthly || 0}</span>
+                    </div>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Ano</span>
+                      <span className={styles.estValue}>+{data.analysisA?.growthEstimate?.yearly || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.pointsList}>
+                  <p className={styles.pointsTitlePos}>✓ Pontos Positivos</p>
+                  <ul className={styles.ulList}>
                     {data.analysisA?.positives?.map((p: string, i: number) => (
-                      <li key={i} style={{ marginBottom: '4px' }}>{p}</li>
-                    )) || <li style={{ color: '#64748b' }}>Sem dados</li>}
+                      <li key={i}>{p}</li>
+                    )) || <li>Sem dados suficientes</li>}
                   </ul>
                 </div>
 
-                {/* Pontos Negativos */}
-                <div>
-                  <p style={{ color: '#f87171', fontSize: '0.85rem', fontWeight: '600', marginBottom: '8px' }}>✗ Pontos a Melhorar</p>
-                  <ul style={{ margin: 0, paddingLeft: '16px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                <div className={styles.pointsList}>
+                  <p className={styles.pointsTitleNeg}>✗ Pontos a Melhorar</p>
+                  <ul className={styles.ulList}>
                     {data.analysisA?.negatives?.map((n: string, i: number) => (
-                      <li key={i} style={{ marginBottom: '4px' }}>{n}</li>
-                    )) || <li style={{ color: '#64748b' }}>Nenhum</li>}
+                      <li key={i}>{n}</li>
+                    )) || <li>Processo otimizado</li>}
                   </ul>
                 </div>
               </div>
@@ -251,94 +245,104 @@ export default function ComparadorPage() {
 
             {/* Canal B */}
             <div className={`glass-card ${styles.fighterCard} ${data.winner === 'B' ? styles.winnerEffect : ''}`}>
-              {data.winner === 'B' && <span className={styles.winnerBadge}>🏆 Vencedor</span>}
+              {data.winner === 'B' && (
+                <div className={styles.winnerBadge}>
+                  <span>🏆 VENCEDOR</span>
+                </div>
+              )}
               <div className={styles.fighterHeader}>
-                <img src={data.canalB.thumbnails || "https://www.youtube.com/img/channel_avatar/placeholder.png"} className={styles.avatar} alt="" />
+                <div className={styles.avatarWrapper}>
+                  <img 
+                    src={getThumbnailUrl(data.canalB)} 
+                    className={styles.avatar} 
+                    alt={data.canalB.title} 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://www.youtube.com/img/channel_avatar/placeholder.png";
+                    }}
+                  />
+                </div>
                 <span className={styles.fighterName}>{data.canalB.title}</span>
               </div>
 
-              <div style={{ marginTop: '16px' }}>
-                {/* Notas */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Engajamento</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisB?.scores?.engagement || 0}/10</p>
+              <div className={styles.metricsSection}>
+                <div className={styles.scoresGrid}>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Engajamento</p>
+                    <p className={styles.scoreValue}>{data.analysisB?.scores?.engagement || 0}/10</p>
                   </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Consistência</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisB?.scores?.consistency || 0}/10</p>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Consistência</p>
+                    <p className={styles.scoreValue}>{data.analysisB?.scores?.consistency || 0}/10</p>
                   </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Base Total</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisB?.scores?.growth || 0}/10</p>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Base Total</p>
+                    <p className={styles.scoreValue}>{data.analysisB?.scores?.growth || 0}/10</p>
                   </div>
-                  <div style={{ textAlign: 'center', flex: 1 }}>
-                    <p style={{ color: '#94a3b8', fontSize: '0.75rem' }}>Autoridade</p>
-                    <p style={{ color: '#00ffcc', fontSize: '1.2rem', fontWeight: 'bold' }}>{data.analysisB?.scores?.authority || 0}/10</p>
-                  </div>
-                </div>
-
-                {/* Crescimento Estimado */}
-                <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(0,242,255,0.05)', borderRadius: '8px' }}>
-                  <p style={{ color: '#00ffcc', fontSize: '0.75rem', fontWeight: '600', marginBottom: '8px' }}>CRESCIMENTO ESTIMADO</p>
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '8px', textAlign: 'center' }}>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Dia</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisB?.growthEstimate?.daily || 0}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Semana</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisB?.growthEstimate?.weekly || 0}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Mês</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisB?.growthEstimate?.monthly || 0}</p>
-                    </div>
-                    <div>
-                      <p style={{ color: '#64748b', fontSize: '0.65rem' }}>Ano</p>
-                      <p style={{ color: '#fff', fontSize: '0.85rem', fontWeight: 'bold' }}>+{data.analysisB?.growthEstimate?.yearly || 0}</p>
-                    </div>
+                  <div className={styles.scoreItem}>
+                    <p className={styles.scoreLabel}>Autoridade</p>
+                    <p className={styles.scoreValue}>{data.analysisB?.scores?.authority || 0}/10</p>
                   </div>
                 </div>
 
-                {/* Pontos Positivos */}
-                <div style={{ marginBottom: '12px' }}>
-                  <p style={{ color: '#4ade80', fontSize: '0.85rem', fontWeight: '600', marginBottom: '8px' }}>✓ Pontos Positivos</p>
-                  <ul style={{ margin: 0, paddingLeft: '16px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                <div className={styles.estimateBox}>
+                  <p className={styles.estimateTitle}>CRESCIMENTO ESTIMADO</p>
+                  <div className={styles.estimateGrid}>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Dia</span>
+                      <span className={styles.estValue}>+{data.analysisB?.growthEstimate?.daily || 0}</span>
+                    </div>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Semana</span>
+                      <span className={styles.estValue}>+{data.analysisB?.growthEstimate?.weekly || 0}</span>
+                    </div>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Mês</span>
+                      <span className={styles.estValue}>+{data.analysisB?.growthEstimate?.monthly || 0}</span>
+                    </div>
+                    <div className={styles.estimateItem}>
+                      <span className={styles.estLabel}>Ano</span>
+                      <span className={styles.estValue}>+{data.analysisB?.growthEstimate?.yearly || 0}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={styles.pointsList}>
+                  <p className={styles.pointsTitlePos}>✓ Pontos Positivos</p>
+                  <ul className={styles.ulList}>
                     {data.analysisB?.positives?.map((p: string, i: number) => (
-                      <li key={i} style={{ marginBottom: '4px' }}>{p}</li>
-                    )) || <li style={{ color: '#64748b' }}>Sem dados</li>}
+                      <li key={i}>{p}</li>
+                    )) || <li>Sem dados suficientes</li>}
                   </ul>
                 </div>
 
-                {/* Pontos Negativos */}
-                <div>
-                  <p style={{ color: '#f87171', fontSize: '0.85rem', fontWeight: '600', marginBottom: '8px' }}>✗ Pontos a Melhorar</p>
-                  <ul style={{ margin: 0, paddingLeft: '16px', color: '#94a3b8', fontSize: '0.8rem' }}>
+                <div className={styles.pointsList}>
+                  <p className={styles.pointsTitleNeg}>✗ Pontos a Melhorar</p>
+                  <ul className={styles.ulList}>
                     {data.analysisB?.negatives?.map((n: string, i: number) => (
-                      <li key={i} style={{ marginBottom: '4px' }}>{n}</li>
-                    )) || <li style={{ color: '#64748b' }}>Nenhum</li>}
+                      <li key={i}>{n}</li>
+                    )) || <li>Processo otimizado</li>}
                   </ul>
                 </div>
               </div>
             </div>
           </div>
 
-          <div className={`glass-card ${styles.card} ${styles.veredictoCard}`}>
+          <div className={`glass-card ${styles.veredictoCard}`}>
             <div className={styles.veredictoHeader}>
               <span className={styles.veredictoIcon}>🏆</span>
-              <h3 style={{ margin: 0 }}>
-                {data.winner === 'A' ? data.canalA.title : data.canalB.title } é o Vencedor!
+              <h3 className={styles.veredictoTitle}>
+                {data.winner === 'A' ? data.canalA.title : data.canalB.title} venceu o duelo!
               </h3>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '32px', marginBottom: '24px' }}>
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Nota Final A</p>
-                <p style={{ color: '#fff', fontSize: '2rem', fontWeight: 'bold' }}>{data.analysisA?.totalScore || 0}</p>
+            
+            <div className={styles.finalScores}>
+              <div className={styles.finalScoreItem}>
+                <p className={styles.finalScoreLabel}>Nota Final Canal A</p>
+                <p className={styles.finalScoreValue}>{data.analysisA?.totalScore || 0}</p>
               </div>
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem' }}>Nota Final B</p>
-                <p style={{ color: '#fff', fontSize: '2rem', fontWeight: 'bold' }}>{data.analysisB?.totalScore || 0}</p>
+              <div className={styles.finalScoreItem}>
+                <p className={styles.finalScoreLabel}>Nota Final Canal B</p>
+                <p className={styles.finalScoreValue}>{data.analysisB?.totalScore || 0}</p>
               </div>
             </div>
             
@@ -349,49 +353,31 @@ export default function ComparadorPage() {
                 </p>
               ))}
             </div>
-          </div>
 
-<center style={{marginTop: '40px'}}>
-              <button className="btn-secondary" onClick={() => setData(null)}>Novo Duelo</button>
-           </center>
+            <center className={styles.newDuelBtn}>
+              <button className="btn-secondary" onClick={() => setData(null)}>INICIAR NOVO DUELO</button>
+            </center>
+          </div>
         </>
       )}
 
       {showCriterios && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          background: 'rgba(0,0,0,0.8)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }} onClick={() => setShowCriterios(false)}>
-          <div className="glass-card" style={{ maxWidth: '600px', maxHeight: '80vh', overflow: 'auto', padding: '32px' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ margin: 0, color: '#fff' }}>Critérios de Análise</h2>
-              <button 
-                onClick={() => setShowCriterios(false)}
-                style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer' }}
-              >×</button>
+        <div className={styles.modalOverlay} onClick={() => setShowCriterios(false)}>
+          <div className={`glass-card ${styles.modalContent}`} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Critérios de Análise</h2>
+              <button className={styles.closeBtn} onClick={() => setShowCriterios(false)}>×</button>
             </div>
             
             {Object.entries(criterios).map(([key, criterio]: [string, any]) => (
-              <div key={key} style={{ marginBottom: '24px' }}>
-                <h3 style={{ color: '#00ffcc', marginBottom: '8px', fontSize: '1rem' }}>{criterio.titulo}</h3>
-                <p style={{ color: '#94a3b8', fontSize: '0.85rem', marginBottom: '12px' }}>{criterio.descricao}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              <div key={key} className={styles.criterioItem}>
+                <h3 className={styles.criterioTitle}>{criterio.titulo}</h3>
+                <p className={styles.criterioDesc}>{criterio.descricao}</p>
+                <div className={styles.notasGrid}>
                   {criterio.notas.map((n: any, i: number) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.8rem' }}>
-                      <span style={{ 
-                        background: n.nota >= 7 ? '#4ade80' : n.nota >= 4 ? '#fbbf24' : '#f87171',
-                        color: '#000',
-                        padding: '2px 8px',
-                        borderRadius: '4px',
-                        fontWeight: 'bold',
-                        minWidth: '24px',
-                        textAlign: 'center'
+                    <div key={i} className={styles.notaRow}>
+                      <span className={styles.notaBadge} style={{ 
+                        background: n.nota >= 7 ? 'linear-gradient(135deg, #4ade80, #22c55e)' : n.nota >= 4 ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #f87171, #ef4444)'
                       }}>{n.nota}</span>
                       <span style={{ color: '#94a3b8' }}>{n.texto}</span>
                     </div>

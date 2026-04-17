@@ -28,6 +28,7 @@ const menuItems = [
   { group: "Mais ferramentas", items: [
     { name: "Mentor IA", path: "/membros/coaching", icon: <User size={20} /> },
     { name: "Comparador", path: "/membros/comparador", icon: <Eye size={20} /> },
+    { name: "Concorrentes", path: "/membros/concorrentes", icon: <Users size={20} /> },
     { name: "Ideias Diárias", path: "/membros/ideias", icon: <Lightbulb size={20} /> },
     { name: "Aprender", path: "/membros/aprender", icon: <GraduationCap size={20} /> },
   ]}
