@@ -1,0 +1,2 @@
+URL do Site (Produção): https://efeito-viral-site.vercel.app/
+URL do Site (Local): http://localhost:3000/

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { Search, Sparkles, X, RotateCw, History, Plus, Zap, TrendingUp } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,14 +21,8 @@ interface Video {
   status: "public" | "draft";
 }
 
-const mockVideos: Video[] = [
-  { id: '1', title: 'COMO CRESCER no YouTube usando IA em 2026', thumbnail: 'https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?q=80&w=400&auto=format&fit=crop', views: '12540', publishedAt: new Date().toISOString(), titleScore: 85, thumbScore: 42, type: 'video', status: 'public' },
-  { id: '2', title: 'Dica rápida de edição de SHORT VIRAL', thumbnail: 'https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?q=80&w=400&auto=format&fit=crop', views: '45200', publishedAt: new Date().toISOString(), titleScore: 92, thumbScore: 88, type: 'short', status: 'public' },
-  { id: '3', title: 'Por que seus vídeos NÃO SÃO RECOMENDADOS?', thumbnail: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?q=80&w=400&auto=format&fit=crop', views: '8910', publishedAt: new Date().toISOString(), titleScore: 65, thumbScore: 35, type: 'video', status: 'public' },
-  { id: '4', title: 'A ESTRATÉGIA SECRETA dos canais de 1M', thumbnail: 'https://images.unsplash.com/photo-1492724441997-5dc865305da7?q=80&w=400&auto=format&fit=crop', views: '15600', publishedAt: new Date().toISOString(), titleScore: 78, thumbScore: 91, type: 'video', status: 'public' },
-];
-
 export default function OtimizadorPage() {
+  const { data: session } = useSession();
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [videos, setVideos] = useState<Video[]>([]);
@@ -49,32 +44,52 @@ export default function OtimizadorPage() {
             ...v,
             titleScore: scores.titleScore,
             thumbScore: scores.thumbScore,
-            contentScore: scores.contentScore
+            contentScore: scores.contentScore,
+            views: v.viewCount || v.views || "0"
           };
         });
 
+        // 1. Tenta API oficial
         if (!data.error && data.videos && data.videos.length > 0) {
           setVideos(processVideos(data.videos));
           setError(null);
-        } else if (Array.isArray(data) && data.length > 0) {
-          setVideos(processVideos(data));
-          setError(null);
         } else {
-          setVideos(processVideos(mockVideos));
-          setError("Vídeos de demonstração");
+          // 2. Fallback via ID do canal na sessão ou perfil
+          const user = session?.user as any;
+          let channelId = user?.youtubeChannelId;
+
+          if (!channelId) {
+            const resProf = await fetch('/api/user/profile');
+            const profData = await resProf.json();
+            channelId = profData.profile?.youtubeChannelId;
+          }
+
+          if (channelId) {
+            const resPub = await fetch(`/api/analise/youtube?channelId=${channelId}`);
+            const dataPub = await resPub.json();
+            if (dataPub.videos && dataPub.videos.length > 0) {
+              setVideos(processVideos(dataPub.videos));
+              setError(null);
+              return;
+            }
+          }
+          
+          setVideos([]);
+          setError("Nenhum vídeo encontrado. Verifique se o seu canal está conectado.");
         }
       } catch (err) {
-        setVideos(mockVideos.map(v => {
-          const scores = calculateVideoScores(v.title, v.id);
-          return { ...v, titleScore: scores.titleScore, thumbScore: scores.thumbScore, contentScore: scores.contentScore };
-        }));
-        setError("Modo de demonstração");
+        console.error("Erro ao carregar vídeos:", err);
+        setVideos([]);
+        setError("Erro ao conectar com o canal.");
       } finally {
         setLoading(false);
       }
     }
-    fetchVideos();
-  }, []);
+    
+    if (session) {
+      fetchVideos();
+    }
+  }, [session]);
 
   const handleVideoClick = (video: Video) => {
     setSelectedVideo(video);

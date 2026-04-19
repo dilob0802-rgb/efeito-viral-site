@@ -1,12 +1,12 @@
-/**
- * Algoritmo determinístico de pontuação para vídeos do YouTube.
- * Garante que o mesmo vídeo sempre receba a mesma nota.
- */
-
-const IMPACT_WORDS = [
-  'viral', 'estratégia', 'segredo', 'revelado', 'como', 'fazer', 
-  'passo a passo', 'dinheiro', 'crescer', 'rápido', 'guia', 
-  'erro', 'nunca', 'sempre', 'hoje', '2026', 'atualizado'
+const EMOTIONAL_TRIGGERS = [
+  // Curiosidade & Tensão
+  'revelado', 'segredo', 'misterioso', 'finalmente', 'descobri', 'estranho',
+  // Medo & Evitar Dor
+  'perigo', 'erro', 'pare', 'nunca', 'farsa', 'cuidado', 'mentira', 'urgente',
+  // Conflito & Drama
+  'confronto', 'briga', 'treta', 'expulso', 'fim', 'traição', 'choque',
+  // Nostalgia & Humos
+  'antigamente', 'época', 'quem lembra', 'hilário', 'surpreendente'
 ];
 
 /**
@@ -16,48 +16,53 @@ function getDeterministicHash(str: string): number {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0; // Converte para inteiro de 32 bits
+    hash |= 0; 
   }
   return Math.abs(hash);
 }
 
 export function calculateVideoScores(title: string, videoId: string) {
   const t = title.toLowerCase();
+  const words = title.trim().split(/\s+/);
   const hash = getDeterministicHash(videoId);
 
-  // --- SCORE DO TÍTULO (LÓGICA REAL) ---
-  let titleScore = 50; // Base média
+  // --- SCORE DO TÍTULO (MÉTODO EFEITO VIRAL - ATUALIZADO) ---
+  let titleScore = 60; // Base inicial um pouco mais alta
 
-  // Comprimento ideal (Next-Gen SEO)
-  if (title.length >= 40 && title.length <= 70) titleScore += 20;
-  else if (title.length < 20 || title.length > 90) titleScore -= 15;
+  // 1. Regra de Ouro: Tamanho (5 a 8 palavras ideal)
+  if (words.length >= 5 && words.length <= 8) titleScore += 25;
+  else if (words.length > 10) titleScore -= 15;
+  else if (words.length < 4) titleScore -= 10;
 
-  // Pontuação por Curiosidade
-  if (t.includes('?')) titleScore += 10;
-  if (t.includes('!')) titleScore += 5;
+  // 2. Penalidade por Números (Público prefere emoção, não listas)
+  if (/\d+/.test(title)) titleScore -= 12;
 
-  // Pontuação por Números
-  if (/\d+/.test(title)) titleScore += 10;
-
-  // Palavras de Impacto
-  IMPACT_WORDS.forEach(word => {
-    if (t.includes(word)) titleScore += 2;
+  // 3. Gatilhos Emocionais (Foco em Tensão e Curiosidade)
+  let emotionalImpact = 0;
+  EMOTIONAL_TRIGGERS.forEach(word => {
+    if (t.includes(word)) emotionalImpact += 5;
   });
+  titleScore += Math.min(emotionalImpact, 20);
 
-  // Limites
-  titleScore = Math.min(Math.max(titleScore, 15), 98);
+  // 4. Formato de Caracteres (~30-35 caracteres ideal)
+  if (title.length >= 25 && title.length <= 40) titleScore += 5;
 
-  // --- SCORE DA MINIATURA (ESTÁVEL POR HASH) ---
-  // Como não analisamos a imagem real, usamos o hash para ser estável.
-  // Criamos uma "assinatura" do vídeo.
-  let thumbScore = 40 + (hash % 50); // Variabilidade entre 40 e 90
+  titleScore = Math.min(Math.max(titleScore, 10), 99);
+
+  // --- SCORE DA MINIATURA (SIMULADO BASEADO EM REGRAS DE DESIGN) ---
+  // A nota da thumb é calculada para incentivar a falta de texto e o uso de rostos.
+  let thumbScore = 50 + (hash % 40);
+
+  // Se o título é muito curto e impactante, sugerimos que a thumb está "limpa"
+  if (titleScore > 85) thumbScore += 10;
   
-  // Se o título é forte, geralmente o canal investe na thumb (correlação simulada)
-  if (titleScore > 80) thumbScore += 5;
-  thumbScore = Math.min(Math.max(thumbScore, 20), 96);
+  // Penalidade simulada se o título for explicativo demais (sugere carga cognitiva alta)
+  if (title.length > 60) thumbScore -= 10;
 
-  // --- SCORE DE CONTEÚDO (ESTÁVEL) ---
-  const contentScore = 75 + (hash % 20); // Entre 75 e 95
+  thumbScore = Math.min(Math.max(thumbScore, 20), 97);
+
+  // --- SCORE DE CONTEÚDO ---
+  const contentScore = 70 + (hash % 25);
 
   return {
     titleScore,

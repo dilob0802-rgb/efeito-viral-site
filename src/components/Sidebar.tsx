@@ -68,7 +68,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
           <div key={gIdx} className={styles.navGroup}>
             {group.group === "Mais ferramentas" && (
               <div className={styles.groupHeader}>
-                {group.group} <ChevronDown size={14} />
+                {group.group}
               </div>
             )}
             {group.items.map((item) => {
