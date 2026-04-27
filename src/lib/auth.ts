@@ -72,7 +72,6 @@ export const authOptions: NextAuthOptions = {
       authorization: {
         params: {
           scope: "openid email profile",
-          prompt: "consent",
         },
       },
     }),
