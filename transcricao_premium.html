@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcrição: Efeito Viral - Venda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #ff4d4d;
+            --secondary: #1a1a1a;
+            --accent: #ffd700;
+            --text: #ffffff;
+            --bg: #0f0f0f;
+            --card-bg: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 40px 20px;
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 77, 77, 0.1) 0%, transparent 40%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.05) 0%, transparent 40%);
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .badge {
+            background: var(--primary);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        .timeline {
+            position: relative;
+            margin-top: 40px;
+        }
+
+        .block {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--primary);
+            opacity: 0.5;
+        }
+
+        .block:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255, 77, 77, 0.3);
+        }
+
+        .timestamp {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 15px;
+        }
+
+        .content {
+            font-size: 1.15rem;
+            color: #ddd;
+            font-weight: 300;
+            letter-spacing: 0.3px;
+        }
+
+        strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border: 1px solid var(--primary);
+            border-radius: 24px;
+            padding: 40px;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .summary-card h2 {
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .summary-card p {
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .download-info {
+            font-size: 0.9rem;
+            color: #555;
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .block { padding: 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="badge">Transcrição Premium</span>
+            <h1>Efeito Viral</h1>
+            <p class="subtitle">Análise e Transcrição do Vídeo de Vendas</p>
+        </header>
+
+        <div class="timeline">
+            <div class="block">
+                <span class="timestamp">0:00 - 1:04</span>
+                <p class="content">"Como virar um influenciador e sair do zero até 1 milhão de visualizações? Eu vou te explicar como eu fiz isso através do método <strong>Efeito Viral</strong>. Se você é um influenciador ou uma marca que precisa atrair atenção qualificada para vender mais os seus produtos, esse vídeo é para você. Muita gente acha que para crescer na internet você precisa de sorte ou precisa que o algoritmo te ajude, mas a verdade é que existem processos por trás de cada vídeo viral. O grande segredo não está em postar muito, mas em postar o conteúdo certo para as pessoas certas."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">1:08 - 2:13</span>
+                <p class="content">"Nós vamos trabalhar três pilares fundamentais. O primeiro pilar é a <strong>Retenção</strong>. Sem retenção, o seu vídeo não é entregue para ninguém. O segundo pilar é o <strong>Engajamento</strong>, que é o que faz as pessoas comentarem e compartilharem o seu conteúdo. E o terceiro pilar é a <strong>Conversão</strong>, porque de nada adianta ter milhões de visualizações se você não transforma isso em vendas ou em autoridade."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">2:17 - 3:10</span>
+                <p class="content">"Muitos alunos me perguntam: 'Mas eu preciso de uma câmera profissional?' E a resposta é <strong>não</strong>. Você só precisa de um celular e de uma estratégia clara. A edição também não precisa ser complexa, ela precisa ser dinâmica. Eu vou te ensinar como usar ferramentas simples para criar vídeos que prendem a atenção do início ao fim."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">3:14 - 4:05</span>
+                <p class="content">"Além das aulas gravadas, nós teremos encontros ao vivo onde eu vou analisar o perfil de alguns alunos e dar feedbacks em tempo real. Essa é a melhor forma de você acelerar o seu aprendizado. Imagine ter o seu conteúdo validado por quem já alcançou os resultados que você deseja. Isso economiza meses, ou até anos, de tentativas frustradas."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">4:09 - 5:25</span>
+                <p class="content">"Agora, você deve estar se perguntando sobre o investimento. Eu preparei algo especial para essa turma. Você vai receber bônus exclusivos: o meu <strong>Manual de Roteiros Virais</strong> e o acesso à nossa <strong>Comunidade Exclusiva</strong> para networking com outros criadores."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">5:29 - 6:10</span>
+                <p class="content">"Nós vamos falar sobre a nossa trajetória e você vai ter também o <strong>Marketplace de Influenciadores</strong>, que é um marketplace que eu estou criando, onde marcas terão um lugar para procurar influenciadores que saibam ser influenciadores. Essa aqui é a oportunidade de monetizar sua influência também."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">6:13 - 7:15</span>
+                <p class="content">"Esse programa tem a duração de 12 meses. A aplicação para você fazer parte dele agora é R$ 500. Sendo parcelado em <strong>8x de R$ 1.437</strong> ou à vista mais R$ 9.500. Sendo que, se você pagar à vista, eu te dou um curso de edição de vídeo."</p>
+            </div>
+
+            <div class="block">
+                <span class="timestamp">7:20 - 8:31</span>
+                <p class="content">"Mas se não pagar à vista, você tem o bônus da turma toda, que é uma <strong>plataforma de criação de conteúdo</strong> e uma plataforma de análise de concorrentes. E se você não conseguir ao menos 1 milhão de visualizações, eu devolvo todo o seu dinheiro. E aí, vamos, Diogo, nessa turma virar influencer?"</p>
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <h2>Garantia de 1 Milhão</h2>
+            <p>Acompanhamento de 12 meses focado em resultados reais de viralização.</p>
+        </div>
+
+        <p class="download-info">Arquivo gerado automaticamente por Antigravity AI.</p>
+    </div>
+</body>
+</html>

@@ -250,23 +250,23 @@ export default function AnaliseDetalhePage() {
                   <div className={styles.analysisGrid}>
                     <div className={styles.pilarCard}>
                       <span className={styles.pilarLabel}>Engajamento</span>
-                      <div className={styles.pilarValue}>{mentorAnalysis.pillars.engajamento}%</div>
-                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: `${mentorAnalysis.pillars.engajamento}%`, background: '#9d4edd' }}></div></div>
+                      <div className={styles.pilarValue}>{mentorAnalysis ? `${mentorAnalysis.pillars.engajamento}%` : "0%"}</div>
+                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: mentorAnalysis ? `${mentorAnalysis.pillars.engajamento}%` : '0%', background: '#9d4edd' }}></div></div>
                     </div>
                     <div className={styles.pilarCard}>
                       <span className={styles.pilarLabel}>SEO Técnico</span>
-                      <div className={styles.pilarValue}>{mentorAnalysis.pillars.seo}%</div>
-                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: `${mentorAnalysis.pillars.seo}%`, background: '#00f2ff' }}></div></div>
+                      <div className={styles.pilarValue}>{mentorAnalysis ? `${mentorAnalysis.pillars.seo}%` : "0%"}</div>
+                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: mentorAnalysis ? `${mentorAnalysis.pillars.seo}%` : '0%', background: '#00f2ff' }}></div></div>
                     </div>
                     <div className={styles.pilarCard}>
                       <span className={styles.pilarLabel}>Retenção IA</span>
-                      <div className={styles.pilarValue}>{mentorAnalysis.pillars.retencao}%</div>
-                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: `${mentorAnalysis.pillars.retencao}%`, background: '#ffea00' }}></div></div>
+                      <div className={styles.pilarValue}>{mentorAnalysis ? `${mentorAnalysis.pillars.retencao}%` : "0%"}</div>
+                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: mentorAnalysis ? `${mentorAnalysis.pillars.retencao}%` : '0%', background: '#ffea00' }}></div></div>
                     </div>
                     <div className={styles.pilarCard}>
                       <span className={styles.pilarLabel}>Consistência</span>
-                      <div className={styles.pilarValue}>{mentorAnalysis.pillars.consistencia}%</div>
-                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: `${mentorAnalysis.pillars.consistencia}%`, background: '#00ff88' }}></div></div>
+                      <div className={styles.pilarValue}>{mentorAnalysis ? `${mentorAnalysis.pillars.consistencia}%` : "0%"}</div>
+                      <div className={styles.pilarBar}><div className={styles.pilarFill} style={{ width: mentorAnalysis ? `${mentorAnalysis.pillars.consistencia}%` : '0%', background: '#00ff88' }}></div></div>
                     </div>
                   </div>
 

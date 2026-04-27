@@ -2,9 +2,8 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import prisma from "@/lib/prisma";
 import { authOptions } from "@/lib/auth";
-import { getMyChannel } from "@/lib/youtube";
 
-// Rota para buscar e sincronizar dados reais do canal do usuário logado
+// Rota para buscar os dados do perfil do usuário logado (Apenas do Banco de Dados)
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -13,11 +12,10 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
     }
 
-    // Busca o usuário atual no banco para obter os tokens do Google salvos
+    // Busca o usuário atual no banco
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
-        googleAccessToken: true,
         niche: true,
         mainGoal: true,
         painPoints: true,
@@ -27,6 +25,10 @@ export async function GET(req: Request) {
         subscribers: true,
         viewCount: true,
         videoCount: true,
+        instagramUsername: true,
+        instagramFollowers: true,
+        tiktokUsername: true,
+        tiktokFollowers: true,
       }
     });
 
@@ -34,40 +36,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
     }
 
-    // Sincroniza com a API do YouTube se tiver o token
-    let updatedData = {};
-    if (user.googleAccessToken) {
-      try {
-        const channel = await getMyChannel(user.googleAccessToken);
-        if (channel) {
-          updatedData = {
-            youtubeChannelId: channel.id,
-            youtubeChannelName: channel.title,
-            youtubeChannelAvatar: channel.thumbnail,
-            subscribers: channel.subscriberCount,
-            viewCount: channel.viewCount,
-            videoCount: channel.videoCount,
-          };
-
-          // Salva os dados atualizados no banco
-          await prisma.user.update({
-            where: { email: session.user.email },
-            data: updatedData
-          });
-        }
-      } catch (err) {
-        console.error("Erro ao sincronizar com YouTube:", err);
-        // Continua para retornar os dados do banco se a sincronização falhar
-      }
-    }
-
-    // Combina os dados existentes com os atualizados
-    const finalProfile = {
-      ...user,
-      ...updatedData
-    };
-
-    return NextResponse.json({ profile: finalProfile });
+    return NextResponse.json({ profile: user });
 
   } catch (error: any) {
     console.error("Erro ao buscar perfil:", error);

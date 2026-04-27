@@ -12,7 +12,7 @@ export default function AnalisePage() {
   const [results, setResults] = useState<any[]>([]);
   const [videoResults, setVideoResults] = useState<any[]>([]);
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"pesquisa" | "canaisTop" | "videosTop">("pesquisa");
+  const [activeTab, setActiveTab] = useState<"pesquisa" | "canaisTop" | "videosTop" | "trends">("pesquisa");
   const [nicheQuery, setNicheQuery] = useState("");
   const [videoNicheQuery, setVideoNicheQuery] = useState("");
 
@@ -38,13 +38,17 @@ export default function AnalisePage() {
           : `/api/analise/youtube?trend=videos`;
       }
 
+      if (type === "trends") {
+        url = `/api/analise/youtube?trend=videos`; // Reutiliza a lógica de vídeos em alta para trends globais
+      }
+
       const response = await fetch(url);
       const data = await response.json();
 
       if (data.error) {
         throw new Error(data.error);
       } else {
-        if (type === "videosTop") {
+        if (type === "videosTop" || type === "trends") {
           setVideoResults(data);
         } else {
           setResults(data);
@@ -63,7 +67,7 @@ export default function AnalisePage() {
         <header className={styles.header}>
           <h1 className={styles.title}>Busca Viral</h1>
           <p className={styles.subtitle}>Encontre concorrentes ou descubra tendências que já estão dominando o YouTube.</p>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
+          <div className={styles.tabContainer}>
             <button 
               className={activeTab === "pesquisa" ? "btn-primary" : "btn-secondary"} 
               onClick={() => setActiveTab("pesquisa")}
@@ -84,6 +88,13 @@ export default function AnalisePage() {
               style={{ padding: '8px 16px', fontSize: '0.9rem' }}
             >
               🔥 Vídeos em Alta {videoNicheQuery ? `em ${videoNicheQuery}` : ""}
+            </button>
+            <button 
+              className={activeTab === "trends" ? "btn-primary" : "btn-secondary"} 
+              onClick={() => { setActiveTab("trends"); handleSearch(undefined, "trends"); }}
+              style={{ padding: '8px 16px', fontSize: '0.9rem' }}
+            >
+              🚀 Trends
             </button>
           </div>
         </header>
@@ -236,11 +247,11 @@ export default function AnalisePage() {
                 ))}
               </div>
             ) : (
-              (activeTab === "pesquisa" || activeTab === "canaisTop" || activeTab === "videosTop") && (
+              (activeTab === "pesquisa" || activeTab === "canaisTop" || activeTab === "videosTop" || activeTab === "trends") && (
                 <div className={`glass-card ${styles.emptyState}`}>
-                  <div className={styles.emptyIcon}>{activeTab === "videosTop" ? "🔥" : activeTab === "canaisTop" ? "⭐" : "🧪"}</div>
-                  <h3>{activeTab === "videosTop" ? "Descubra Vídeos Virais" : activeTab === "canaisTop" ? "Descubra Canais em Alta" : "Comece agora"}</h3>
-                  <p>{activeTab === "videosTop" ? "Veja os vídeos que estão bombando ou filtre por um nicho acima." : activeTab === "canaisTop" ? "Clique no botão Filtrar ou digite um nicho acima para ver quem está dominando o YouTube." : "Insira um perfil acima para iniciar o Raio-X de estratégia com IA."}</p>
+                  <div className={styles.emptyIcon}>{activeTab === "trends" ? "🚀" : activeTab === "videosTop" ? "🔥" : activeTab === "canaisTop" ? "⭐" : "🧪"}</div>
+                  <h3>{activeTab === "trends" ? "Tendências do Momento" : activeTab === "videosTop" ? "Descubra Vídeos Virais" : activeTab === "canaisTop" ? "Descubra Canais em Alta" : "Comece agora"}</h3>
+                  <p>{activeTab === "trends" ? "Veja o que está dominando o YouTube em tempo real agora mesmo." : activeTab === "videosTop" ? "Veja os vídeos que estão bombando ou filtre por um nicho acima." : activeTab === "canaisTop" ? "Clique no botão Filtrar ou digite um nicho acima para ver quem está dominando o YouTube." : "Insira um perfil acima para iniciar o Raio-X de estratégia com IA."}</p>
                   <div className={styles.suggestions}>
                     <span>Sugestões:</span>
                     <button onClick={() => { if(activeTab === "videosTop") { setVideoNicheQuery("marketing"); } else if(activeTab === "canaisTop") { setNicheQuery("marketing"); } else { setQuery("marketing"); } }} className={styles.tag}>#marketing</button>

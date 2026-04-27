@@ -35,34 +35,11 @@ export default function OnboardingPage() {
   const [channelSearch, setChannelSearch] = useState("");
   const [searchError, setSearchError] = useState("");
 
-  // Busca automática se logado via Google
-  useEffect(() => {
-    const autoFetch = async () => {
-      setIsAutoFetching(true);
-      try {
-        const res = await fetch("/api/analise/youtube?mine=true");
-        if (res.ok) {
-          const channel = await res.json();
-          if (channel && channel.id) {
-            setData(prev => ({
-              ...prev,
-              youtubeChannelId: channel.id,
-              youtubeChannelName: channel.title,
-              youtubeChannelAvatar: channel.thumbnail,
-              subscribers: channel.subscriberCount // Já pega os inscritos reais!
-            }));
-            // Pula as etapas automáticas
-            setCurrentStep(1); 
-          }
-        }
-      } catch (err) {
-        console.error("Erro ao buscar canal automaticamente:", err);
-      } finally {
-        setIsAutoFetching(false);
-      }
-    };
+  const [showHelp, setShowHelp] = useState(false);
 
-    autoFetch();
+  // Busca automática desativada conforme solicitação
+  useEffect(() => {
+    setIsAutoFetching(false);
   }, []);
 
   const next = () => {
@@ -78,39 +55,24 @@ export default function OnboardingPage() {
   };
 
   const findChannel = async () => {
-    let query = channelSearch.trim();
-    if (!query) return;
-
-    if (query.includes("youtube.com/")) {
-      if (query.includes("/@")) {
-        query = "@" + query.split("/@")[1].split("/")[0].split("?")[0];
-      } else if (query.includes("/channel/")) {
-        query = query.split("/channel/")[1].split("/")[0].split("?")[0];
+    // Simulação de confirmação manual
+    if (channelSearch.trim()) {
+      // Tenta extrair o nome limpo se for um link
+      let name = channelSearch;
+      if (name.includes("@")) {
+        name = name.split("@")[1];
+      } else if (name.includes("youtube.com/channel/")) {
+        name = name.split("youtube.com/channel/")[1];
+      } else if (name.includes("youtube.com/c/")) {
+        name = name.split("youtube.com/c/")[1];
       }
-    }
 
-    setSearchLoading(true);
-    setSearchError("");
-    
-    try {
-      const res = await fetch(`/api/analise/youtube?q=${encodeURIComponent(query)}&type=channel`);
-      const results = await res.json();
-      
-      if (results && results.length > 0) {
-        const topChannel = results[0];
-        setData({
-          ...data,
-          youtubeChannelId: topChannel.id,
-          youtubeChannelName: topChannel.title,
-          youtubeChannelAvatar: topChannel.thumbnail
-        });
-      } else {
-        setSearchError("Canal não encontrado. Tente digitar apenas o @ ou o nome.");
-      }
-    } catch (err) {
-      setSearchError("Erro ao buscar canal. Verifique sua conexão.");
-    } finally {
-      setSearchLoading(false);
+      setData({
+        ...data,
+        youtubeChannelId: "manual-" + Date.now(),
+        youtubeChannelName: name,
+        youtubeChannelAvatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=9d4edd&color=fff&size=128`
+      });
     }
   };
 
@@ -189,10 +151,44 @@ export default function OnboardingPage() {
                 <button 
                   onClick={findChannel} 
                   disabled={searchLoading}
-                  style={{ background: '#9d4edd', border: 'none', padding: '12px', borderRadius: '12px', cursor: 'pointer', color: 'white' }}
+                  style={{ background: '#9d4edd', border: 'none', padding: '12px 24px', borderRadius: '12px', cursor: 'pointer', color: 'white', fontWeight: 'bold' }}
                 >
-                  {searchLoading ? "..." : <Search size={20} />}
+                  Confirmar
                 </button>
+              </div>
+
+              {/* Barra Recolhível de Ajuda */}
+              <div style={{ marginBottom: '20px' }}>
+                <button 
+                  onClick={() => setShowHelp(!showHelp)}
+                  style={{ background: 'none', border: 'none', color: '#9d4edd', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', padding: '5px 0' }}
+                >
+                  <Search size={14} />
+                  Onde encontro o link do meu canal?
+                  {showHelp ? <ArrowRight size={14} style={{ transform: 'rotate(-90deg)' }} /> : <ArrowRight size={14} style={{ transform: 'rotate(90deg)' }} />}
+                </button>
+                
+                {showHelp && (
+                  <div style={{ 
+                    marginTop: '10px', 
+                    padding: '15px', 
+                    backgroundColor: 'rgba(157, 78, 221, 0.05)', 
+                    borderRadius: '12px', 
+                    border: '1px solid rgba(157, 78, 221, 0.2)',
+                    fontSize: '0.85rem',
+                    color: '#94a3b8',
+                    lineHeight: '1.5',
+                    animation: 'fadeIn 0.3s ease'
+                  }}>
+                    <p style={{ marginBottom: '10px', color: '#fff', fontWeight: '600' }}>Siga estes passos:</p>
+                    <ol style={{ paddingLeft: '18px' }}>
+                      <li style={{ marginBottom: '8px' }}>Acesse o <b>YouTube</b> pelo computador ou celular.</li>
+                      <li style={{ marginBottom: '8px' }}>Clique na sua <b>foto de perfil</b>.</li>
+                      <li style={{ marginBottom: '8px' }}>Vá em <b>"Seu canal"</b> (ou Visualizar canal).</li>
+                      <li>Copie o link que aparece no topo (ex: youtube.com/@seu-nome).</li>
+                    </ol>
+                  </div>
+                )}
               </div>
 
               {searchError && (
@@ -212,18 +208,30 @@ export default function OnboardingPage() {
                   gap: '16px',
                   animation: 'fadeIn 0.3s ease'
                 }}>
-                  <img 
-                    src={data.youtubeChannelAvatar} 
-                    alt="Avatar" 
-                    referrerPolicy="no-referrer"
-                    style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover' }} 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(data.youtubeChannelName) + "&background=9d4edd&color=fff";
-                    }}
-                  />
+                  <div style={{ 
+                    width: '60px', 
+                    height: '60px', 
+                    borderRadius: '50%', 
+                    overflow: 'hidden', 
+                    border: '2px solid #9d4edd',
+                    backgroundColor: '#1a1a1a',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>
+                    <img 
+                      src={data.youtubeChannelAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(data.youtubeChannelName)}&background=9d4edd&color=fff`} 
+                      alt="Avatar" 
+                      referrerPolicy="no-referrer"
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + encodeURIComponent(data.youtubeChannelName) + "&background=9d4edd&color=fff";
+                      }}
+                    />
+                  </div>
                   <div style={{ flex: 1 }}>
-                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700' }}>{data.youtubeChannelName}</h3>
-                    <p style={{ fontSize: '0.8rem', color: '#94a3b8' }}>Canal Confirmado ✅</p>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#fff' }}>{data.youtubeChannelName}</h3>
+                    <p style={{ fontSize: '0.8rem', color: '#00ffcc' }}>Canal Confirmado ✅</p>
                   </div>
                 </div>
               )}
@@ -231,8 +239,15 @@ export default function OnboardingPage() {
           )}
 
           {STEPS[currentStep].id === "niche" && (
-            <div className={styles.optionsGrid}>
-              {["Marketing & Negócios", "Fitness & Saúde", "Games & Entretenimento", "Tecnologia", "Vlogs & Estilo de Vida", "Outro"].map(n => (
+            <div className={styles.optionsGrid} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+              {[
+                "Saúde", "Finanças", "Educação", "Tecnologia", "Entretenimento", 
+                "Games", "Beleza e estética", "Moda", "Fitness e esportes", 
+                "Alimentação / culinária", "Viagem e turismo", "Relacionamentos", 
+                "Desenvolvimento pessoal", "Negócios / empreendedorismo", 
+                "Marketing digital", "Lifestyle (estilo de vida)", "Notícias / política", 
+                "Música", "Automóveis", "Família / maternidade", "Outro"
+              ].map(n => (
                 <button 
                   key={n}
                   className={`${styles.optionButton} ${data.niche === n ? styles.selected : ""}`}

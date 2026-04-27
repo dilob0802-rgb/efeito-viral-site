@@ -78,6 +78,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                   key={item.name}
                   href={item.path}
                   className={`${styles.navLink} ${isActive ? styles.active : ""}`}
+                  onClick={onClose}
                 >
                   <span className={styles.icon}>{item.icon}</span>
                   <span className={styles.name}>{item.name}</span>
@@ -97,6 +98,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 key={link.name}
                 href={link.path}
                 className={`${styles.navLink} ${styles.smallLink} ${isActive ? styles.active : ""}`}
+                onClick={onClose}
               >
                 <span className={styles.icon}>{link.icon}</span>
                 <span className={styles.name}>{link.name}</span>

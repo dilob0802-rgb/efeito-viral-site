@@ -99,11 +99,16 @@
   font-weight: 600;
   cursor: pointer;
   padding: 10px 20px;
-  transition: color 0.2s;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 12px;
 }
 
 .backButton:hover {
   color: white;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .nextButton {
@@ -179,17 +184,22 @@
 
   .footer {
     margin-top: 24px;
-    flex-direction: column-reverse;
+    flex-direction: row;
+    justify-content: space-between;
     gap: 12px;
   }
 
   .nextButton {
-    width: 100%;
+    flex: 1;
     justify-content: center;
+    padding: 14px 10px;
+    font-size: 0.9rem;
   }
 
   .backButton {
-    width: 100%;
-    text-align: center;
+    flex: 1;
+    justify-content: center;
+    padding: 14px 10px;
+    font-size: 0.9rem;
   }
 }

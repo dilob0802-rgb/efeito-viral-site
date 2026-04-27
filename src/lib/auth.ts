@@ -72,7 +72,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       authorization: {
         params: {
-          scope: "openid email profile https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/yt-analytics.readonly",
+          scope: "openid email profile",
           access_type: "offline",
           prompt: "consent",
         },
@@ -84,41 +84,20 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "google") {
         if (!user.email) return false;
 
-        // Tentar capturar o canal IMEDIATAMENTE no login
-        let channelData = null;
-        if (account.access_token) {
-           channelData = await getMyChannel(account.access_token);
-        }
-
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email }
         });
-
+ 
         if (!existingUser) {
           await prisma.user.create({
             data: {
               email: user.email,
-              name: user.name || channelData?.title || "Usuário Google",
+              name: user.name || "Usuário Google",
               password: "",
               onboardingComplete: false,
               role: "USER",
-              youtubeChannelId: channelData?.id,
-              youtubeChannelName: channelData?.title,
-              youtubeChannelAvatar: channelData?.thumbnail,
-              subscribers: channelData?.subscriberCount
             }
           });
-        } else {
-            // Atualiza os dados do canal se mudaram ou estavam vazios
-            await prisma.user.update({
-                where: { email: user.email },
-                data: {
-                    youtubeChannelId: channelData?.id || existingUser.youtubeChannelId,
-                    youtubeChannelName: channelData?.title || existingUser.youtubeChannelName,
-                    youtubeChannelAvatar: channelData?.thumbnail || existingUser.youtubeChannelAvatar,
-                    subscribers: channelData?.subscriberCount || existingUser.subscribers
-                }
-            });
         }
         return true;
       }
@@ -151,6 +130,10 @@ export const authOptions: NextAuthOptions = {
             token.youtubeChannelName = dbUser.youtubeChannelName;
             token.youtubeChannelAvatar = dbUser.youtubeChannelAvatar;
             token.subscribers = dbUser.subscribers;
+            token.instagramUsername = dbUser.instagramUsername;
+            token.instagramFollowers = dbUser.instagramFollowers;
+            token.tiktokUsername = dbUser.tiktokUsername;
+            token.tiktokFollowers = dbUser.tiktokFollowers;
             // ACESSO LIBERADO: Forçamos premium para todos temporariamente
             token.isPremium = true;
             token.plan = "PRO";
@@ -174,14 +157,6 @@ export const authOptions: NextAuthOptions = {
       if (account && account.provider === "google" && token.email) {
         token.accessToken = account.access_token;
         token.refreshToken = account.refresh_token;
-
-        await prisma.user.update({
-          where: { email: token.email },
-          data: {
-            googleAccessToken: account.access_token,
-            googleRefreshToken: account.refresh_token,
-          }
-        }).catch(e => console.error("Erro ao salvar tokens Google:", e));
       }
 
       if (trigger === "update" && session) {
@@ -201,6 +176,10 @@ export const authOptions: NextAuthOptions = {
         (session.user as any).mainGoal = token.mainGoal;
         (session.user as any).painPoints = token.painPoints;
         (session.user as any).subscribers = token.subscribers;
+        (session.user as any).instagramUsername = token.instagramUsername;
+        (session.user as any).instagramFollowers = token.instagramFollowers;
+        (session.user as any).tiktokUsername = token.tiktokUsername;
+        (session.user as any).tiktokFollowers = token.tiktokFollowers;
         (session.user as any).isPremium = token.isPremium;
         (session.user as any).plan = token.plan;
       }

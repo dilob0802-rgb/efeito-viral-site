@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -31,6 +31,12 @@ model User {
   painPoints         String?   // Salvo como string separada por vírgula ou JSON
   selectedMentor     String?
   
+  // Redes Sociais
+  instagramUsername  String?
+  instagramFollowers String?
+  tiktokUsername     String?
+  tiktokFollowers    String?
+  
   // Dados do Canal Conectado
   youtubeChannelId     String?
   youtubeChannelName   String?
@@ -51,6 +57,7 @@ model User {
   competitors        Competitor[]
   youtubeChannels    YoutubeChannel[]
   orders             Order[]
+  statsHistory       UserStatsHistory[]
 }
 
 model Order {
@@ -140,4 +147,20 @@ model Analysis {
   type            String   // viral_posts, strategy_xray, action_plan
   data            String   // JSON string with the analysis results
   createdAt     DateTime @default(now())
+}
+
+model UserStatsHistory {
+  id                 String   @id @default(cuid())
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  instagramFollowers Int?
+  youtubeSubscribers Int?
+  tiktokFollowers    Int?
+  
+  month              Int      // 1-12
+  year               Int
+  recordedAt         DateTime @default(now())
+
+  @@unique([userId, month, year])
 }

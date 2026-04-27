@@ -10,8 +10,20 @@ export async function GET(req: NextRequest) {
   const channelId = searchParams.get("channelId") || searchParams.get("id");
   const trend = searchParams.get("trend");
   const mine = searchParams.get("mine");
+  const videoId = searchParams.get("videoId") || searchParams.get("v");
 
   try {
+    if (videoId) {
+      const response = await fetch(`https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`);
+      const data = await response.json();
+      return NextResponse.json({
+        id: videoId,
+        title: data.title,
+        thumbnail: data.thumbnail_url,
+        publishedAt: new Date().toISOString()
+      });
+    }
+
     if (mine === "true") {
       const session = await getServerSession(authOptions);
       if (!session?.user?.email) {

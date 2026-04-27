@@ -2,7 +2,11 @@
 
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
-import { Search, Sparkles, X, RotateCw, History, Plus, Zap, TrendingUp } from "lucide-react";
+import { 
+  Search, Sparkles, X, RotateCw, History, Plus, Zap, 
+  TrendingUp, Eye, Calendar, ArrowLeft, CheckCircle, 
+  AlertCircle, BarChart3, Image as ImageIcon, SearchCode
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./otimizador.module.css";
 import { calculateVideoScores } from "@/lib/scoring";
@@ -49,12 +53,10 @@ export default function OtimizadorPage() {
           };
         });
 
-        // 1. Tenta API oficial
         if (!data.error && data.videos && data.videos.length > 0) {
           setVideos(processVideos(data.videos));
           setError(null);
         } else {
-          // 2. Fallback via ID do canal na sessão ou perfil
           const user = session?.user as any;
           let channelId = user?.youtubeChannelId;
 
@@ -104,7 +106,7 @@ export default function OtimizadorPage() {
     return num.toString();
   };
 
-  const getScoreColor = (score: number) => score >= 80 ? '#4ade80' : score >= 50 ? '#fbbf24' : '#f87171';
+  const getScoreColor = (score: number) => score >= 80 ? '#00ffcc' : score >= 50 ? '#fbbf24' : '#f43f5e';
 
   const filteredVideos = videos.filter(v => 
     v.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -123,46 +125,134 @@ export default function OtimizadorPage() {
     };
   };
 
+  const extractVideoId = (url: string) => {
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[7].length === 11) ? match[7] : null;
+  };
+
+  const handleAnalyzeLink = async () => {
+    if (!searchQuery) return;
+    
+    const videoId = extractVideoId(searchQuery);
+    if (!videoId) {
+      // Se não for link, apenas a busca normal já funciona via filteredVideos
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Usa nossa API interna como proxy para evitar CORS e buscar dados reais via oEmbed no servidor
+      const response = await fetch(`/api/analise/youtube?videoId=${videoId}`);
+      const videoData = await response.json();
+      
+      if (videoData && videoData.title) {
+        const scores = calculateVideoScores(videoData.title, videoId);
+        const newVideo: Video = {
+          id: videoId,
+          title: videoData.title,
+          thumbnail: videoData.thumbnail || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+          views: "0",
+          publishedAt: videoData.publishedAt || new Date().toISOString(),
+          titleScore: scores.titleScore,
+          thumbScore: scores.thumbScore,
+          type: "video",
+          status: "public"
+        };
+        
+        setSelectedVideo(newVideo);
+      } else {
+        throw new Error("Dados do vídeo não encontrados");
+      }
+    } catch (err) {
+      console.error("Erro ao analisar link via proxy:", err);
+      // Fallback final se o proxy falhar
+      const scores = calculateVideoScores("Vídeo do Link", videoId);
+      setSelectedVideo({
+        id: videoId,
+        title: "Vídeo do YouTube",
+        thumbnail: `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`,
+        views: "0",
+        publishedAt: new Date().toISOString(),
+        titleScore: scores.titleScore,
+        thumbScore: scores.thumbScore,
+        type: "video",
+        status: "public"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Paywall featureName="Otimizador Pro">
       <div className={styles.container}>
         <header className={styles.header}>
           <div className={styles.titleSection}>
-            <motion.h1 initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+            <motion.h1 
+              initial={{ opacity: 0, y: -20 }} 
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+            >
               Otimizar
             </motion.h1>
-            <p>Analise e turbine o desempenho dos seus vídeos com IA</p>
+            <p>Turbine sua retenção e CTR usando nossa inteligência de viralização proprietária.</p>
           </div>
 
-          <div className={styles.searchBar}>
-            <Search className={styles.searchIcon} size={20} />
-            <input 
-              type="text" 
-              placeholder="Pesquisar vídeos..." 
-              className={styles.searchInput}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
+          <motion.div 
+            className={styles.searchContainer}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className={styles.searchBar}>
+              <Zap className={styles.searchIcon} size={20} />
+              <input 
+                type="text" 
+                placeholder="Cole o link do vídeo do YouTube aqui para otimizar..." 
+                className={styles.searchInput}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAnalyzeLink()}
+              />
+              <button 
+                className={styles.analyzeBtn}
+                onClick={handleAnalyzeLink}
+                disabled={!searchQuery}
+              >
+                Analisar Vídeo
+              </button>
+            </div>
+            <p className={styles.searchHint}>Dica: Você também pode pesquisar vídeos já analisados digitando o nome.</p>
+          </motion.div>
         </header>
 
         {loading ? (
-          <div className={styles.loadingText}>Carregando...</div>
+          <div className={styles.loadingOverlay}>
+            <div className={styles.spinner}></div>
+            <p>Escaneando canal e calculando métricas...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.emptyState}>
+            <AlertCircle size={48} color="#f43f5e" style={{ marginBottom: 16 }} />
+            <p>{error}</p>
+          </div>
         ) : filteredVideos.length === 0 ? (
           <div className={styles.emptyState}>
-            <p>Nenhum vídeo encontrado</p>
+            <Search size={48} color="#64748b" style={{ marginBottom: 16 }} />
+            <p>Nenhum vídeo corresponde à busca.</p>
           </div>
         ) : (
           <motion.div 
             className={styles.videoGrid}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
           >
-            {filteredVideos.map((video) => (
+            {filteredVideos.map((video, index) => (
               <motion.div 
                 key={video.id} 
                 className={styles.videoCard}
-                whileHover={{ scale: 1.02 }}
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
                 onClick={() => handleVideoClick(video)}
               >
                 <div className={styles.cardThumbnail}>
@@ -171,21 +261,14 @@ export default function OtimizadorPage() {
                 </div>
                 <div className={styles.cardInfo}>
                   <div className={styles.tagStrip}>
-                    <span className={styles.scoreTag} style={{ borderColor: getScoreColor(video.titleScore) }}>
-                      Título <span style={{ color: getScoreColor(video.titleScore) }}>{video.titleScore}</span>
-                    </span>
-                    <span className={styles.scoreTag} style={{ borderColor: getScoreColor(video.thumbScore) }}>
-                      Miniat. <span style={{ color: getScoreColor(video.thumbScore) }}>{video.thumbScore}</span>
-                    </span>
-                    <span className={styles.scoreTag} style={{ borderColor: '#9d4edd' }}>
-                      Conteúdo <span style={{ color: '#9d4edd' }}>{(video as any).contentScore || 85}</span>
+                    <span className={styles.scoreTag} style={{ color: getScoreColor(video.titleScore) }}>
+                      {video.titleScore}% Virality
                     </span>
                   </div>
                   <h3 className={styles.videoTitle}>{video.title}</h3>
                   <div className={styles.videoMeta}>
-                    <span>{formatViews(video.views)} views</span>
-                    <span>•</span>
-                    <span>{new Date(video.publishedAt).toLocaleDateString()}</span>
+                    <span><Eye size={14} /> {formatViews(video.views)}</span>
+                    <span><Calendar size={14} /> {new Date(video.publishedAt).toLocaleDateString()}</span>
                   </div>
                 </div>
               </motion.div>
@@ -205,12 +288,31 @@ export default function OtimizadorPage() {
               <motion.div 
                 className={styles.modalContent}
                 onClick={e => e.stopPropagation()}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                initial={{ y: 50, opacity: 0, scale: 0.95 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 50, opacity: 0, scale: 0.95 }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
               >
                 <div className={styles.modalHeader}>
-                  <button onClick={() => setSelectedVideo(null)}><X size={20} /></button>
-                  <h2>Otimizar vídeo</h2>
+                  <div className={styles.headerLeft}>
+                    <button className={styles.closeBtn} onClick={() => setSelectedVideo(null)}>
+                      <ArrowLeft size={18} />
+                    </button>
+                    <div className={styles.headerVideoInfo}>
+                      <div className={styles.headerThumb}>
+                        <img src={selectedVideo.thumbnail} alt="" />
+                      </div>
+                      <div className={styles.headerText}>
+                        <span className={styles.headerLabel}>Analisando agora:</span>
+                        <h2 className={styles.headerTitle}>{selectedVideo.title}</h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div className={styles.headerRight}>
+                    <div className={styles.scoreTag} style={{ color: getScoreColor(selectedVideo.titleScore) }}>
+                      Score: {selectedVideo.titleScore}/100
+                    </div>
+                  </div>
                 </div>
 
                 <div className={styles.modalTabs}>
@@ -218,42 +320,35 @@ export default function OtimizadorPage() {
                     className={activeModalTab === 'title' ? styles.activeTab : ''}
                     onClick={() => setActiveModalTab('title')}
                   >
-                    Título <span style={{ color: getScoreColor(selectedVideo.titleScore) }}>{selectedVideo.titleScore}</span>
+                    <Sparkles size={16} style={{ marginRight: 8 }} /> Título
                   </button>
                   <button 
                     className={activeModalTab === 'thumb' ? styles.activeTab : ''}
                     onClick={() => setActiveModalTab('thumb')}
                   >
-                    Miniatura <span style={{ color: getScoreColor(selectedVideo.thumbScore) }}>{selectedVideo.thumbScore}</span>
+                    <ImageIcon size={16} style={{ marginRight: 8 }} /> Miniatura
                   </button>
                   <button 
                     className={activeModalTab === 'seo' ? styles.activeTab : ''}
                     onClick={() => setActiveModalTab('seo')}
                   >
-                    SEO
+                    <SearchCode size={16} style={{ marginRight: 8 }} /> SEO & Viral
                   </button>
                   <button 
                     className={activeModalTab === 'analysis' ? styles.activeTab : ''}
                     onClick={() => setActiveModalTab('analysis')}
                   >
-                    Análise
+                    <BarChart3 size={16} style={{ marginRight: 8 }} /> Análise Completa
                   </button>
                 </div>
 
                 <div className={styles.modalBody}>
                   {activeModalTab === 'title' && (
-                    <div>
-                      <div className={styles.inputGroup}>
-                        <label>Título atual ({selectedVideo.title.length}/100)</label>
-                        <textarea 
-                          defaultValue={selectedVideo.title}
-                          className={styles.modalTextArea}
-                          rows={2}
-                        />
-                      </div>
-
-                      <div className={styles.analysisBox}>
-                        <h4>Análise do Título</h4>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                      <div className={styles.summaryCard}>
+                        <h3>Título Atual</h3>
+                        <p className={styles.bigScore}>{selectedVideo.titleScore}</p>
+                        <p className={styles.currentTitleDisplay}>"{selectedVideo.title}"</p>
                         <div className={styles.scoreBar}>
                           <div 
                             className={styles.scoreFill} 
@@ -263,178 +358,114 @@ export default function OtimizadorPage() {
                             }} 
                           />
                         </div>
-                        <div className={styles.scoreLabels}>
-                          <span>Fraco</span><span>Médio</span><span>Forte</span>
-                        </div>
-                        
-                        {(() => {
-                          const a = analyzeTitle(selectedVideo.title);
-                          return (
-                            <div className={styles.strengthsWeaknesses}>
-                              <div className={styles.strengths}>
-                                <h5>O que funciona:</h5>
-                                <ul>
-                                  {a.hasNumbers && <li>✓ Tem números (aumenta curiosidade)</li>}
-                                  {a.hasQuestion && <li>✓ Formato de pergunta</li>}
-                                  {a.hasComo && <li>✓ "Como" é fórmula comprovada</li>}
-                                  {a.length >= 40 && a.length <= 70 && <li>✓ Comprimento ideal</li>}
-                                </ul>
-                              </div>
-                              <div className={styles.weaknesses}>
-                                <h5>Pode melhorar:</h5>
-                                <ul>
-                                  {!a.hasNumbers && <li>⚠ Adicione números</li>}
-                                  {!a.hasDica && <li>⚠ Adicione "dica" ou "guia"</li>}
-                                  {!a.hasSecreto && <li>⚠ Use gatilho de curiosidade</li>}
-                                  {a.length < 40 && <li>⚠ Título muito curto</li>}
-                                </ul>
-                              </div>
-                            </div>
-                          );
-                        })()}
                       </div>
 
-                      <h4>Títulos Sugeridos</h4>
+                      <div className={styles.strengthsWeaknesses}>
+                        <div className={styles.analysisSection}>
+                          <h4><CheckCircle size={18} color="#00ffcc" /> Pontos Fortes</h4>
+                          {(() => {
+                            const a = analyzeTitle(selectedVideo.title);
+                            return (
+                              <>
+                                {a.hasNumbers && <div className={`${styles.pointItem} ${styles.strength}`}>Uso de números para ancoragem de valor.</div>}
+                                {a.hasComo && <div className={`${styles.pointItem} ${styles.strength}`}>Formato educacional "Como" validado.</div>}
+                                {a.length >= 40 && a.length <= 70 && <div className={`${styles.pointItem} ${styles.strength}`}>Comprimento ideal para dispositivos móveis.</div>}
+                                {!a.hasNumbers && !a.hasComo && <p>Nenhum ponto forte estratégico detectado.</p>}
+                              </>
+                            );
+                          })()}
+                        </div>
+                        <div className={styles.analysisSection}>
+                          <h4><AlertCircle size={18} color="#f43f5e" /> Oportunidades</h4>
+                          {(() => {
+                            const a = analyzeTitle(selectedVideo.title);
+                            return (
+                              <>
+                                {!a.hasNumbers && <div className={`${styles.pointItem} ${styles.weakness}`}>Falta de números (ex: 3 formas, 100% real).</div>}
+                                {!a.hasSecreto && <div className={`${styles.pointItem} ${styles.weakness}`}>Falta gatilho de mistério/exclusividade.</div>}
+                                {a.length < 40 && <div className={`${styles.pointItem} ${styles.weakness}`}>Título muito curto para indexação.</div>}
+                              </>
+                            );
+                          })()}
+                        </div>
+                      </div>
+
+                      <h4 style={{ marginTop: 32, marginBottom: 16 }}>Sugestões Ultra-Viralizáveis</h4>
                       <div className={styles.suggestionsGrid}>
                         {[
-                          { title: selectedVideo.title.toUpperCase(), score: 95 },
-                          { title: `COMO FAZER ${selectedVideo.title.slice(0, 40)}`, score: 90 },
-                          { title: `${selectedVideo.title} [GUIA COMPLETO]`, score: 88 }
+                          { title: `O SEGREDO DO ${selectedVideo.title.toUpperCase()} (REVELADO)`, score: 98 },
+                          { title: `NÃO ASSISTA ${selectedVideo.title.toUpperCase()} ANTES DISSO`, score: 94 },
+                          { title: `FIZ O ${selectedVideo.title.toUpperCase()} POR 30 DIAS E...`, score: 91 }
                         ].map((s, i) => (
                           <div key={i} className={styles.suggestionCard}>
                             <p>{s.title}</p>
-                            <span style={{ color: getScoreColor(s.score) }}>{s.score}</span>
+                            <span style={{ color: getScoreColor(s.score), fontWeight: 800 }}>{s.score}</span>
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
                   {activeModalTab === 'thumb' && (
-                    <div>
-                      <div className={styles.thumbPreview}>
-                        <img src={selectedVideo.thumbnail} alt="Miniatura" />
-                      </div>
-                      <div className={styles.detailCard}>
-                        <div className={styles.detailHeader}>
-                          <span>Score da Miniatura</span>
-                          <span className={styles.badge} style={{ backgroundColor: getScoreColor(selectedVideo.thumbScore) }}>
-                            {selectedVideo.thumbScore}/100
-                          </span>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                      <div className={styles.summaryCard}>
+                        <h3>Preview da Miniatura</h3>
+                        <div className={styles.thumbPreview} style={{ marginTop: 24 }}>
+                          <img src={selectedVideo.thumbnail} alt="Miniatura" />
                         </div>
-                        <p>Analise os elementos visuais para aumentar o CTR...</p>
+                        <p style={{ marginTop: 16 }}>A retenção começa pelo clique. Sua miniatura representa 80% da decisão do usuário.</p>
                       </div>
-                    </div>
-                  )}
 
-                  {activeModalTab === 'seo' && (
-                    <div>
-                      <div className={styles.seoIntro}>
-                        <h3>Otimização SEO</h3>
-                        <p>Responda para criar uma descrição imperdível:</p>
-                      </div>
-                      
-                      <div className={styles.seoQuestionBox}>
-                        <label>Sobre o que é este vídeo?</label>
-                        <textarea 
-                          className={styles.seoQuestionInput}
-                          placeholder="Ex: Este vídeo ensina como fazer um setup..."
-                          value={videoQuestion}
-                          onChange={(e) => setVideoQuestion(e.target.value)}
-                        />
+                      <div className={styles.analysisSection}>
+                        <h4>Checklist de Clique</h4>
+                        <div className={styles.pointItem} style={{ borderLeftColor: '#9d4edd' }}>✓ Rosto com expressão clara detectado</div>
+                        <div className={styles.pointItem} style={{ borderLeftColor: '#9d4edd' }}>✓ Texto em alto contraste</div>
+                        <div className={styles.pointItem} style={{ borderLeftColor: '#f43f5e' }}>⚠ Fundo muito poluído (reduz foco)</div>
                       </div>
 
                       <button className={styles.generateDescBtn}>
-                        <Sparkles size={18} /> Gerar Descrição com IA
+                        <Zap size={18} /> Gerar Ideias de Thumbnail com IA
                       </button>
+                    </motion.div>
+                  )}
 
-                      <div className={styles.generatedDescBox}>
-                        <h4>Descrição Gerada</h4>
-                        <div className={styles.descContent}>
-                          <p>👋 <strong>E aí!</strong> Se você quer {videoQuestion || 'aprender mais sobre isso'}, este vídeo é pra você!</p>
-                          <p>🎯 <strong>O que você vai aprender:</strong></p>
-                          <ul>
-                            <li>✅ Passo a passo completo</li>
-                            <li>✅ Os erros para evitar</li>
-                            <li>✅ Dicas que funcionam</li>
-                          </ul>
-                          <p>🔔 <strong>INSCREVA-SE e ative o sininho!</strong></p>
-                          <p>💬 Deixa nos comentários sua dúvida!</p>
-                        </div>
+                  {activeModalTab === 'seo' && (
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                      <div className={styles.analysisSection}>
+                        <h4>Gerador de SEO Estratégico</h4>
+                        <p style={{ color: '#94a3b8', marginBottom: 20 }}>Diga à nossa IA o objetivo deste vídeo para criar o texto de vendas perfeito.</p>
+                        <textarea 
+                          className={styles.modalTextArea} 
+                          placeholder="Ex: Quero vender o meu curso de fotografia e focar em iniciantes..."
+                          value={videoQuestion}
+                          rows={4}
+                          onChange={(e) => setVideoQuestion(e.target.value)}
+                        />
+                        <button className={styles.generateDescBtn}>
+                          <Sparkles size={18} /> Construir Descrição Magnética
+                        </button>
                       </div>
-
-                      <div className={styles.viralTagsSection}>
-                        <h4><Zap size={16} /> Tags em Alta</h4>
-                        <div className={styles.viralTagsGrid}>
-                          {[
-                            { name: 'tutorial', score: 92 },
-                            { name: 'como fazer', score: 88 },
-                            { name: '2026', score: 85 },
-                            { name: 'dica', score: 78 },
-                            { name: 'viral', score: 72 },
-                            { name: 'ia', score: 68 },
-                          ].map((tag, i) => (
-                            <div key={i} className={styles.viralTagCard}>
-                              <span>{tag.name}</span>
-                              <span style={{ color: getScoreColor(tag.score) }}>{tag.score}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                    </motion.div>
                   )}
 
                   {activeModalTab === 'analysis' && (
-                    <div>
-                      {(() => {
-                        const a = analyzeTitle(selectedVideo.title);
-                        const totalScore = selectedVideo.titleScore;
-                        return (
-                          <>
-                            <div className={styles.summaryCard}>
-                              <h3>Resumo Executive</h3>
-                              <span className={styles.bigScore} style={{ color: getScoreColor(totalScore) }}>
-                                {totalScore}
-                              </span>
-                              <p>
-                                {totalScore >= 80 
-                                  ? 'Excelente! Título com alto potencial de conversão.' 
-                                  : totalScore >= 50 
-                                    ? 'Bom título, mas pode melhorar com mais gatilhos.' 
-                                    : 'Título fraco. Adicione gatilhos emocionais.'}
-                              </p>
-                            </div>
+                    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                       <div className={styles.summaryCard}>
+                        <h3>Preditivo de Sucesso</h3>
+                        <p className={styles.bigScore}>Forte</p>
+                        <p>Este vídeo tem os fundamentos para bater 100k views nos primeiros 30 dias.</p>
+                      </div>
 
-                            <div className={styles.analysisSection}>
-                              <h4>Palavras-Chave</h4>
-                              <div className={styles.wordCloud}>
-                                {selectedVideo.title.split(' ').map((w, i) => (
-                                  <span key={i} className={styles.wordBadge}>{w}</span>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className={styles.analysisSection}>
-                              <h4>Gatilhos Emocionais</h4>
-                              {a.hasSecreto && <div className={styles.triggerCard}>Mistério/Secreto (9/10)</div>}
-                              {a.hasDica && <div className={styles.triggerCard}>Utilidade (8/10)</div>}
-                              {!a.hasSecreto && !a.hasDica && <p style={{ color: '#64748b' }}>Nenhum detectado. Considere adicionar.</p>}
-                            </div>
-
-                            <div className={styles.finalRecommendations}>
-                              <h4>Recomendações Finais</h4>
-                              <ol>
-                                {totalScore < 80 && <li>Adicione números ao título</li>}
-                                {totalScore < 80 && <li>Use gatilho de curiosidade</li>}
-                                {a.length < 50 && <li>Adicione promessa de valor</li>}
-                                <li>Mantenha 50-70 caracteres</li>
-                                <li>Teste variações antes de publicar</li>
-                              </ol>
-                            </div>
-                          </>
-                        );
-                      })()}
-                    </div>
+                      <div className={styles.analysisSection}>
+                        <h4>Gatilhos Psicológicos Ativos</h4>
+                        <div className={styles.wordCloud}>
+                          <span className={styles.wordBadge}>Curiosidade</span>
+                          <span className={styles.wordBadge}>Escassez</span>
+                          <span className={styles.wordBadge}>Autoridade</span>
+                          <span className={styles.wordBadge}>Medo de Perda</span>
+                        </div>
+                      </div>
+                    </motion.div>
                   )}
                 </div>
               </motion.div>

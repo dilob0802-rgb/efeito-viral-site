@@ -4,6 +4,7 @@ import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import OnboardingPage from "./onboarding/page";
+import SocialStatsForm from "@/components/SocialStatsForm";
 import styles from "./dashboard.module.css";
 import { BarChart3, TrendingUp, Users, Video, Clock, Zap, Play, Rocket, Calendar } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
@@ -98,64 +99,15 @@ export default function Dashboard() {
             const profile = profData.profile;
             setStats({
               ...profile,
-              viewCount: profile.viewCount || profile.viewCount,
+              viewCount: profile.viewCount,
               subscriberCount: profile.subscribers || profile.subscriberCount,
               videoCount: profile.videoCount
             });
           }
-        } else {
-          // Fallback: tenta buscar do YouTube diretamente se a API falhar
-          try {
-            const ytRes = await fetch('/api/analise/youtube?channelId=mine');
-            const ytData = await ytRes.json();
-            if (ytData.id) {
-              setStats({
-                ...stats,
-                youtubeChannelAvatar: ytData.thumbnail,
-                viewCount: ytData.statistics?.viewCount,
-                subscriberCount: ytData.statistics?.subscriberCount,
-                videoCount: ytData.statistics?.videoCount
-              });
-            }
-          } catch (e) {
-            console.error("Erro ao buscar dados do YouTube:", e);
-          }
         }
-
-        const resAn = await fetch(`/api/user/analytics`);
-        if (resAn.ok) {
-          const anData = await resAn.json();
-          if (anData.rows && anData.rows.length > 0 && anData.columnHeaders) {
-            const viewIdx = anData.columnHeaders.findIndex((h: any) => h.name === "views");
-            const subIdx = anData.columnHeaders.findIndex((h: any) => h.name === "subscribersGained");
-            
-            if (viewIdx >= 0 && subIdx >= 0) {
-              const formatted = anData.rows.map((row: any) => ({
-                name: row[0].split("-").slice(1).reverse().join("/"),
-                val: chartMetric === "Visualizações" ? parseInt(row[viewIdx]) : parseInt(row[subIdx])
-              }));
-              
-              const maxVal = Math.max(...formatted.map((d: any) => d.val));
-              const profileTotal = stats?.viewCount ? parseInt(stats.viewCount) : 0;
-              
-              if (maxVal < 10 && profileTotal > 100) {
-                setUseMockData(true);
-              } else {
-                setChartData(formatted);
-                setUseMockData(false);
-              }
-            } else {
-              setUseMockData(true);
-            }
-          } else if (anData.error) {
-              console.error("Erro do Analytics:", anData.error);
-              setUseMockData(true);
-            } else {
-              setUseMockData(true);
-            }
-        } else {
-          setUseMockData(true);
-        }
+        
+        // Conexão via API desativada - Usando dados locais e mockups para o gráfico
+        setUseMockData(true);
       } catch (e) { 
         console.error("Erro ao buscar dados:", e);
         setUseMockData(true);
@@ -218,6 +170,21 @@ export default function Dashboard() {
     const totalViews = stats?.viewCount ? parseInt(stats.viewCount) : 0;
     const totalSubs = (stats?.subscriberCount || stats?.subscribers) ? parseInt(stats.subscriberCount || stats.subscribers) : 0;
     const videoCount = stats?.videoCount ? parseInt(stats.videoCount) : 0;
+
+    // Se as views forem 0, não fazemos projeções (tudo zerado)
+    if (totalViews === 0) {
+      setProjection({
+        atual: { visualizacoes: 0, inscrito: totalSubs, videos: videoCount, mediaPorVideo: 0 },
+        projections: [
+          { periodo: "1 mês", visualizacoes: 0, inscritos: 0 },
+          { periodo: "3 meses", visualizacoes: 0, inscritos: 0 },
+          { periodo: "6 meses", visualizacoes: 0, inscritos: 0 },
+          { periodo: "1 ano", visualizacoes: 0, inscritos: 0 },
+        ]
+      });
+      return;
+    }
+
     const avgViewsPerVideo = videoCount > 0 ? Math.round(totalViews / videoCount) : 0;
     
     const engagementRate = totalSubs > 0 ? (avgViewsPerVideo / totalSubs) : 0;
@@ -227,10 +194,10 @@ export default function Dashboard() {
     const adjustedGrowthRate = baseGrowthRate * consistencyScore;
     
     const projections = [
-      { periodo: "1 mês", visualizacoes: Math.round(Math.max(avgViewsPerVideo, 1) * Math.max(videoCount, 1) * (1 + adjustedGrowthRate)), inscritos: Math.round(Math.max(totalSubs, 1) * (1 + adjustedGrowthRate)) },
-      { periodo: "3 meses", visualizacoes: Math.round(Math.max(avgViewsPerVideo, 1) * Math.max(videoCount, 1) * Math.pow(1 + adjustedGrowthRate, 3)), inscritos: Math.round(Math.max(totalSubs, 1) * Math.pow(1 + adjustedGrowthRate, 3)) },
-      { periodo: "6 meses", visualizacoes: Math.round(Math.max(avgViewsPerVideo, 1) * Math.max(videoCount, 1) * Math.pow(1 + adjustedGrowthRate, 6)), inscritos: Math.round(Math.max(totalSubs, 1) * Math.pow(1 + adjustedGrowthRate, 6)) },
-      { periodo: "1 ano", visualizacoes: Math.round(Math.max(avgViewsPerVideo, 1) * Math.max(videoCount, 1) * Math.pow(1 + adjustedGrowthRate, 12)), inscritos: Math.round(Math.max(totalSubs, 1) * Math.pow(1 + adjustedGrowthRate, 12)) },
+      { periodo: "1 mês", visualizacoes: Math.round(avgViewsPerVideo * videoCount * (1 + adjustedGrowthRate)), inscritos: Math.round(totalSubs * (1 + adjustedGrowthRate)) },
+      { periodo: "3 meses", visualizacoes: Math.round(avgViewsPerVideo * videoCount * Math.pow(1 + adjustedGrowthRate, 3)), inscritos: Math.round(totalSubs * Math.pow(1 + adjustedGrowthRate, 3)) },
+      { periodo: "6 meses", visualizacoes: Math.round(avgViewsPerVideo * videoCount * Math.pow(1 + adjustedGrowthRate, 6)), inscritos: Math.round(totalSubs * Math.pow(1 + adjustedGrowthRate, 6)) },
+      { periodo: "1 ano", visualizacoes: Math.round(avgViewsPerVideo * videoCount * Math.pow(1 + adjustedGrowthRate, 12)), inscritos: Math.round(totalSubs * Math.pow(1 + adjustedGrowthRate, 12)) },
     ];
 
     setProjection({
@@ -267,7 +234,7 @@ export default function Dashboard() {
       <header className={styles.header}>
         <div>
           <h1 className={styles.title}>Bem-vindo, {session?.user?.name || "Membro"}! 👋</h1>
-          <p className={styles.subtitle}>Aqui está o desempenho do seu canal hoje.</p>
+          <p className={styles.subtitle}>Aqui está o desempenho do seu ecossistema hoje.</p>
         </div>
         <div className={styles.channelBadge}>
           { (stats?.youtubeChannelAvatar || (session?.user as any)?.youtubeChannelAvatar || stats?.thumbnail) ? (
@@ -290,40 +257,9 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Visualizações</span>
-            <BarChart3 size={20} color="#9d4edd" />
-          </div>
-          <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.viewCount)}
-          </p>
-          <span className={styles.statTrend}>Total acumulado</span>
-        </div>
+      <SocialStatsForm />
 
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Inscritos</span>
-            <Users size={20} color="#00ffcc" />
-          </div>
-          <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.subscribers || stats?.subscriberCount)}
-          </p>
-          <span className={styles.statTrend}>Inscritos atuais</span>
-        </div>
-
-        <div className={styles.statCard}>
-          <div className={styles.statHeader}>
-            <span className={styles.statTitle}>Vídeos Publicados</span>
-            <Play size={20} color="#ff9e00" />
-          </div>
-          <p className={styles.statValue}>
-            {loadingStats && !stats ? "..." : safeFormatNumber(stats?.videoCount)}
-          </p>
-          <span className={styles.statTrend}>Conteúdo no ar</span>
-        </div>
-      </div>
+      {/* Cards de estatísticas removidos conforme solicitação */}
 
 
       {projection && (

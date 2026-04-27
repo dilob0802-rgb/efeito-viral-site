@@ -1,6 +1,8 @@
 const YOUTUBE_API_BASE_URL = "https://www.googleapis.com/youtube/v3";
 const API_KEY = process.env.YOUTUBE_API_KEY;
 
+import { safeDelay } from "./safe-call";
+
 export interface YoutubeChannelInfo {
   id: string;
   title: string;
@@ -25,6 +27,7 @@ export interface YoutubeVideoInfo {
 export async function searchChannel(query: string): Promise<YoutubeChannelInfo[]> {
   if (!API_KEY) throw new Error("YOUTUBE_API_KEY não configurada.");
 
+  await safeDelay(300, 800); // Pausa inicial humana
   const response = await fetch(
     `${YOUTUBE_API_BASE_URL}/search?part=snippet&type=channel&q=${encodeURIComponent(query)}&maxResults=5&key=${API_KEY}`
   );
@@ -43,6 +46,7 @@ export async function searchChannel(query: string): Promise<YoutubeChannelInfo[]
 
   const channelIds = data.items.map((item: any) => item.id.channelId).join(",");
   
+  await safeDelay(400, 1000); // Pausa entre buscar ID e buscar Stats
   // Pegar estatísticas detalhadas
   const statsResponse = await fetch(
     `${YOUTUBE_API_BASE_URL}/channels?part=snippet,statistics&id=${channelIds}&key=${API_KEY}`
@@ -407,6 +411,7 @@ export async function getChannelDetailsScraping(input: string): Promise<YoutubeC
        url = `https://www.youtube.com/channel/${input}/about`;
     }
 
+    await safeDelay(1000, 2500); // Scraping exige mais cautela e pausas longas
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',

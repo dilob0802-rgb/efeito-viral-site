@@ -1,6 +1,7 @@
 .container {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -22,6 +23,13 @@
   font-size: 1.125rem;
 }
 
+.tabContainer {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
 .searchSection {
   margin-bottom: 48px;
 }
@@ -34,6 +42,8 @@
   border-radius: 20px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .searchForm:focus-within {
@@ -68,8 +78,9 @@
 
 .contentGrid {
   display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 32px;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+  width: 100%;
 }
 
 .emptyState {
