@@ -3,7 +3,6 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
-import { getMyChannel } from "./youtube";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -70,6 +69,11 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          scope: "openid email profile",
+        },
+      },
     }),
   ],
   callbacks: {
@@ -131,25 +135,17 @@ export const authOptions: NextAuthOptions = {
             token.isPremium = true;
             token.plan = "PRO";
           } else {
-            // Se o usuário não estiver no banco (ex: login google novo), também damos PRO
             token.isPremium = true;
             token.plan = "PRO";
           }
         } catch (error) {
-          console.error("Erro no DB durante o JWT (ignorado para não derrubar o login):", error);
-          // Em caso de erro de banco, ainda assim damos PRO
+          console.error("Erro no DB durante o JWT:", error);
           token.isPremium = true;
           token.plan = "PRO";
         }
       } else if (token.email?.toLowerCase() === "admin@efeitoviral.com") {
-        // Garantia para o admin também
         token.isPremium = true;
         token.plan = "PRO";
-      }
-
-      if (account && account.provider === "google" && token.email) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
       }
 
       if (trigger === "update" && session) {
