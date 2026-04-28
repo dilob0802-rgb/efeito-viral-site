@@ -205,13 +205,6 @@ export default function AnalisePage() {
               <div className={styles.videoGrid}>
                 {videoResults.map((video) => (
                   <article key={video.id} className={styles.videoCard}>
-                    <div className={styles.videoThumbWrapper}>
-                      <img 
-                        src={video.thumbnails} 
-                        alt={video.title} 
-                        className={styles.videoThumb} 
-                      />
-                    </div>
                     <div className={styles.videoInfo}>
                       {(() => {
                         const scores = calculateVideoScores(video.title, video.id);

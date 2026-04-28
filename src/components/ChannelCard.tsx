@@ -32,16 +32,6 @@ export default function ChannelCard({ id, title, thumbnails, subscriberCount, vi
       style={{ display: 'flex', flexDirection: 'column', gap: '16px', position: 'relative', overflow: 'hidden' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <img 
-          src={thumbnails} 
-          alt={title} 
-          className={styles.avatar} 
-          referrerPolicy="no-referrer"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement;
-            target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(title)}&background=9d4edd&color=fff`;
-          }}
-        />
         <div className={styles.info} style={{ flex: 1 }}>
           <h3 className={styles.name}>{title}</h3>
           <div className={styles.stats}>
